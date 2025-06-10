@@ -1,0 +1,69 @@
+/* Job Confirmation Page Styles */
+.alert-success {
+    border-left: 4px solid #28a745;
+    background-color: #f8fff9;
+}
+
+.card-header {
+    background-color: #f8f9fa;
+    border-bottom: 2px solid #dee2e6;
+}
+
+.detail-row {
+    padding: 12px 0;
+    border-bottom: 1px solid #f1f3f4;
+}
+
+.detail-row:last-child {
+    border-bottom: none;
+}
+
+.detail-label {
+    color: #495057;
+    font-weight: 600;
+}
+
+.detail-value {
+    color: #212529;
+    font-weight: 500;
+}
+
+.job-details {
+    background-color: #fafbfc;
+    padding: 20px;
+    border-radius: 8px;
+    border: 1px solid #e9ecef;
+}
+
+.btn-primary {
+    background-color: #0066cc;
+    border-color: #0066cc;
+    padding: 12px 30px;
+    font-weight: 500;
+}
+
+.btn-primary:hover {
+    background-color: #0056b3;
+    border-color: #004085;
+    transform: translateY(-1px);
+    box-shadow: 0 4px 8px rgba(0, 102, 204, 0.2);
+}
+
+.badge {
+    font-size: 0.9rem;
+    padding: 8px 12px;
+}
+
+.list-unstyled li {
+    padding: 5px 0;
+}
+
+@media (max-width: 576px) {
+    .detail-row .row {
+        flex-direction: column;
+    }
+    
+    .detail-label {
+        margin-bottom: 5px;
+    }
+}

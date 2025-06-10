@@ -1,0 +1,159 @@
+{% extends "base_with_sidebar.html" %}
+{% load static %}
+
+{% block title %}Job Scheduler - Power BI Automation Engine{% endblock %}
+
+{% block breadcrumb %}
+<li class="breadcrumb-item">
+    <a href="{% url 'index' %}">Home</a>
+</li>
+<li class="breadcrumb-item active">Job Scheduler</li>
+{% endblock %}
+
+{% block page_title %}Job Scheduler{% endblock %}
+
+{% block action_buttons %}
+<!-- Action Buttons -->
+<div class="action-buttons">
+    <button class="btn btn-lg btn-outline-success create-btn">
+        Create
+    </button>
+</div>
+{% endblock %}
+
+{% block search_section %}
+<!-- Search Section -->
+<div class="search-section">
+    <div class="search-container">
+        <img src="{% static 'image/NaviBarIcon/Search.png' %}" alt="Search" class="search-icon">
+        <input type="text" class="search-input" placeholder="Search Schedule...">
+    </div>
+</div>
+{% endblock %}
+
+{% block content %}
+<div class="container-fluid">
+    <div class="row">
+        <div class="col-12">
+            <div class="card">
+                <div class="card-header">
+                    <h6 class="mb-0">Scheduled Jobs</h6>
+                </div>
+                <div class="card-body">
+                    <div class="table-responsive">
+                        <table class="table table-hover">
+                            <thead>
+                                <tr>
+                                    <th>Job Name</th>
+                                    <th>Program ID</th>
+                                    <th>Property Name</th>
+                                    <th>Trigger Frequency</th>
+                                    <th>Trigger Time</th>
+                                    <th>Actions</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                <tr>
+                                    <td>Daily Sales Report</td>
+                                    <td>PROG_001</td>
+                                    <td>SalesReportConfig</td>
+                                    <td>Daily</td>
+                                    <td>09:00</td>
+                                    <td>
+                                        <button class="btn btn-sm btn-outline-primary">Edit</button>
+                                        <button class="btn btn-sm btn-outline-danger">Delete</button>
+                                    </td>
+                                </tr>
+                                <tr>
+                                    <td>Weekly KPI Dashboard</td>
+                                    <td>PROG_002</td>
+                                    <td>KPIDashboardSettings</td>
+                                    <td>Weekly</td>
+                                    <td>10:30</td>
+                                    <td>
+                                        <button class="btn btn-sm btn-outline-primary">Edit</button>
+                                        <button class="btn btn-sm btn-outline-danger">Delete</button>
+                                    </td>
+                                </tr>
+                                <tr>
+                                    <td>Monthly Financial Report</td>
+                                    <td>PROG_003</td>
+                                    <td>FinancialReportTemplate</td>
+                                    <td>Monthly</td>
+                                    <td>08:00</td>
+                                    <td>
+                                        <button class="btn btn-sm btn-outline-primary">Edit</button>
+                                        <button class="btn btn-sm btn-outline-danger">Delete</button>
+                                    </td>
+                                </tr>
+                                <tr>
+                                    <td>Quarterly Business Review</td>
+                                    <td>PROG_004</td>
+                                    <td>QuarterlyAnalysisConfig</td>
+                                    <td>Monthly</td>
+                                    <td>16:30</td>
+                                    <td>
+                                        <button class="btn btn-sm btn-outline-primary">Edit</button>
+                                        <button class="btn btn-sm btn-outline-danger">Delete</button>
+                                    </td>
+                                </tr>
+                                <tr>
+                                    <td>Customer Analytics Update</td>
+                                    <td>PROG_005</td>
+                                    <td>CustomerDataProcessing</td>
+                                    <td>Daily</td>
+                                    <td>14:15</td>
+                                    <td>
+                                        <button class="btn btn-sm btn-outline-primary">Edit</button>
+                                        <button class="btn btn-sm btn-outline-danger">Delete</button>
+                                    </td>
+                                </tr>
+                                <tr>
+                                    <td>Inventory Status Report</td>
+                                    <td>PROG_006</td>
+                                    <td>InventoryTrackingSettings</td>
+                                    <td>Weekly</td>
+                                    <td>06:45</td>
+                                    <td>
+                                        <button class="btn btn-sm btn-outline-primary">Edit</button>
+                                        <button class="btn btn-sm btn-outline-danger">Delete</button>
+                                    </td>
+                                </tr>
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block extra_js %}
+<script>
+    document.addEventListener('DOMContentLoaded', function() {
+        console.log('Job Scheduler page loaded');
+        
+        // Add functionality for create button
+        document.querySelectorAll('.create-btn').forEach(btn => {
+            btn.addEventListener('click', function() {
+                window.location.href = "{% url 'create_job' %}";
+            });
+        });
+        
+        // Add search functionality
+        const searchInput = document.querySelector('.search-input');
+        if (searchInput) {
+            searchInput.addEventListener('input', function() {
+                const searchTerm = this.value.toLowerCase();
+                const tableRows = document.querySelectorAll('tbody tr');
+                
+                tableRows.forEach(row => {
+                    const text = row.textContent.toLowerCase();
+                    row.style.display = text.includes(searchTerm) ? '' : 'none';
+                });
+            });
+        }
+    });
+</script>
+{% endblock %}

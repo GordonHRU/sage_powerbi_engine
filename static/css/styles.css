@@ -1,0 +1,212 @@
+* {
+    font-family: "Segoe UI Variable", "Segoe UI", system-ui, -apple-system, sans-serif;
+}
+
+/* Make html and body full height */
+html, body {
+    height: 100%;
+    margin: 0;
+    padding: 0;
+}
+
+/* Wrapper to push footer to bottom */
+.page-wrapper {
+    min-height: 100vh;
+    display: flex;
+    flex-direction: column;
+}
+
+/* Header styling */
+.header {
+    background-color: #bdccd4;
+    padding: 15px 0;
+    border-bottom: 1px solid #e9ecef;
+    box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+}
+
+.header-content {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    position: relative;
+}
+
+.header-center {
+    position: absolute;
+    left: 50%;
+    transform: translateX(-50%);
+}
+
+.header-title {
+    color: #333300;
+    font-weight: bold;
+    margin: 0;
+}
+
+.header-spacer {
+    width: 200px; /* Match the max-width of the logo to balance the layout */
+}
+
+.logo-link {
+    display: inline-block;
+    text-decoration: none;
+    transition: opacity 0.2s ease;
+}
+
+.logo-link:hover {
+    opacity: 0.8;
+}
+
+.logo {
+    height: 50px;
+    width: auto;
+    max-width: 200px;
+    cursor: pointer;
+}
+
+/* Main content area */
+.main-content {
+    flex: 1;
+    padding: 20px 0;
+}
+
+h2 {
+    color: #603813;
+    font-weight: bold;
+    padding: 5% 0;
+    text-align: left;
+    margin-left: calc(-50vw + 50% + 15px); /* Break out of container to align with logo */
+    width: calc(100vw - 30px); /* Full width minus padding */
+}
+
+.horizontal {
+    display: flex;
+    justify-content: center; /* Centers the icon links horizontally */
+    gap: 20px; /* Adjust spacing between the two links */
+    flex-wrap: wrap; /* Allow wrapping on smaller screens */
+}
+
+.vertical {
+    flex: 1; /* Each button takes equal width */
+    max-width: 150px; /* Optional: set maximum width to prevent too wide buttons */
+    min-width: 120px; /* Optional: set minimum width */
+}
+
+.icon-link {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    text-decoration: none; /* Optional: removes underline */
+    gap: 8px; /* Optional: adds space between icon and text */
+    padding: 15px 10px; /* Optional: add padding for better button appearance */
+    border-radius: 8px; /* Optional: rounded corners */
+    transition: background-color 0.2s; /* Optional: smooth hover effect */
+    width: 100%; /* Take full width of parent */
+    height: 100%; /* Equal height if needed */
+    box-sizing: border-box;
+    color: inherit;
+}
+
+.icon-link:hover {
+    background-color: #f8f9fa; /* Optional: hover effect */
+    text-decoration: none;
+    color: inherit;
+}
+
+/* Footer styling */
+.footer {
+    background-color: #f8f9fa;
+    padding: 20px 0;
+    text-align: center;
+    margin-top: auto;
+    border-top: 1px solid #e9ecef;
+}
+
+.footer p {
+    margin: 0;
+    color: #6c757d;
+    font-size: 14px;
+}
+
+/* Last Viewed Section */
+.no-recent-text {
+    text-align: center;
+    color: #6c757d;
+    font-style: italic;
+    margin: 20px 0;
+}
+
+.NoResources {
+    display: block;
+    margin: 20px auto;
+    max-width: 64px;
+    height: auto;
+}
+
+/* Service icon styling */
+.JobScheduler,
+.Program,
+.Group,
+.EmailTemplate,
+.JobProperties,
+.Configuration {
+    width: 64px;
+    height: 64px;
+    object-fit: contain;
+}
+
+/* Clear button styling */
+.clear-history-btn {
+    background-color: #6c757d;
+    color: white;
+    border: none;
+    padding: 8px 16px;
+    border-radius: 4px;
+    font-size: 12px;
+    cursor: pointer;
+    margin: 10px auto;
+    display: block;
+    transition: background-color 0.2s;
+}
+
+.clear-history-btn:hover {
+    background-color: #5a6268;
+}
+
+/* Hidden class for toggling visibility */
+.hidden {
+    display: none;
+}
+
+/* Responsive adjustments */
+@media (max-width: 768px) {
+    .horizontal {
+        flex-direction: column;
+        align-items: center;
+    }
+    
+    .vertical {
+        max-width: 200px;
+        width: 100%;
+    }
+    
+    .header-content {
+        flex-direction: column;
+        gap: 10px;
+    }
+    
+    .header-center {
+        position: static;
+        transform: none;
+    }
+    
+    .header-spacer {
+        display: none;
+    }
+
+    /* Adjust h2 margin for mobile */
+    h2 {
+        margin-left: 15px; /* Simplified alignment for mobile */
+        width: auto; /* Reset width for mobile */
+    }
+}

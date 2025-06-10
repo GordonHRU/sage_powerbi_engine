@@ -1,0 +1,67 @@
+{% extends "base.html" %}
+{% load static %}
+
+{% block title %}Power BI Automation Engine - Home{% endblock %}
+
+{% block content %}
+<!-- Our Services Section -->
+<div class="container">
+    <h2>Our Services</h2>
+    <div class="horizontal">
+        <div class="vertical">
+            <a class="icon-link" href="{% url 'job_scheduler' %}">
+                <img src="{% static 'image/ServiceIcon/JobScheduler.png' %}" class="JobScheduler" alt="Job Scheduler"/>
+                Job Scheduler
+            </a>
+        </div>
+
+        <div class="vertical">
+            <a class="icon-link" href="{% url 'program' %}">
+                <img src="{% static 'image/ServiceIcon/program.png' %}" class="program" alt="program"/>
+                program
+            </a>
+        </div>
+
+        <div class="vertical">
+            <a class="icon-link" href="{% url 'group' %}">
+                <img src="{% static 'image/ServiceIcon/Group.png' %}" class="Group" alt="Group"/>
+                Group
+            </a>
+        </div>
+
+        <div class="vertical">
+            <a class="icon-link" href="{% url 'email_template' %}">
+                <img src="{% static 'image/ServiceIcon/EmailTemplate.png' %}" class="EmailTemplate" alt="Email Template"/>
+                Email Template
+            </a>
+        </div>
+
+        <div class="vertical">
+            <a class="icon-link" href="{% url 'job_properties' %}">
+                <img src="{% static 'image/ServiceIcon/JobProperties.png' %}" class="JobProperties" alt="Job Properties"/>
+                Job Properties
+            </a>
+        </div>
+
+        <div class="vertical">
+            <a class="icon-link" href="{% url 'configuration' %}">
+                <img src="{% static 'image/ServiceIcon/Configuration.png' %}" class="Configuration" alt="Configuration"/>
+                Configuration
+            </a>
+        </div>
+    </div>
+</div>
+
+<!-- Last Viewed Section -->
+<div class="container">
+    <h2>Last Viewed</h2>
+    <div id="lastViewedContent">
+        <img src="{% static 'image/ServiceIcon/NoResources.png' %}" class="NoResources" alt="No Resources"/>
+        <p class="no-recent-text">No resources have been viewed recently</p>
+    </div>
+</div>
+{% endblock %}
+
+{% block extra_js %}
+<script src="{% static 'js/main.js' %}"></script>
+{% endblock %}
