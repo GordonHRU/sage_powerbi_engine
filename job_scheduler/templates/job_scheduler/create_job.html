@@ -1,7 +1,7 @@
 {% extends "base_with_sidebar.html" %}
 {% load static %}
 
-{% block title %}Create New Job - Power BI Automation Engine{% endblock %}
+{% block title %}New Scheduled Job - Power BI Automation Engine{% endblock %}
 
 {% block breadcrumb %}
 <li class="breadcrumb-item">
@@ -10,10 +10,10 @@
 <li class="breadcrumb-item">
     <a href="{% url 'job_scheduler' %}">Job Scheduler</a>
 </li>
-<li class="breadcrumb-item active">Create New Job</li>
+<li class="breadcrumb-item active">New Scheduled Job</li>
 {% endblock %}
 
-{% block page_title %}Create New Scheduled Job{% endblock %}
+{% block page_title %}New Scheduled Job{% endblock %}
 
 {% block content %}
 <div class="container-fluid">
@@ -38,11 +38,8 @@
                                    class="form-control" 
                                    id="jobName" 
                                    name="jobName" 
-                                   placeholder="Enter job name"
+                                   placeholder="Enter Job Name"
                                    required>
-                            <div class="invalid-feedback">
-                                Please provide a valid job name.
-                            </div>
                         </div>
 
                         <!-- Program ID Field -->
@@ -66,9 +63,6 @@
                                 <option value="PROG_009">PROG_009 - HR Dashboard</option>
                                 <option value="PROG_010">PROG_010 - Supply Chain Analyzer</option>
                             </select>
-                            <div class="invalid-feedback">
-                                Please select a valid program ID.
-                            </div>
                         </div>
 
                         <!-- Property Name Field -->
@@ -94,9 +88,6 @@
                                 <option value="DataWarehouseSettings">DataWarehouseSettings</option>
                                 <option value="ReportingEngineConfig">ReportingEngineConfig</option>
                             </select>
-                            <div class="invalid-feedback">
-                                Please select a valid property name.
-                            </div>
                         </div>
 
                         <!-- Trigger Frequency Field -->
@@ -113,14 +104,11 @@
                                 <option value="Weekly">Weekly</option>
                                 <option value="Monthly">Monthly</option>
                             </select>
-                            <div class="invalid-feedback">
-                                Please select a trigger frequency.
-                            </div>
                         </div>
 
                         <!-- Trigger Time Field -->
                         <div class="mb-4">
-                            <label for="triggerTime" class="form-label required-field">
+                            <label class="form-label required-field">
                                 Trigger Time <span class="text-danger">*</span>
                             </label>
                             <div class="row">
@@ -155,11 +143,9 @@
                                         <option value="22">22</option>
                                         <option value="23">23</option>
                                     </select>
-                                    <div class="invalid-feedback">
-                                        Please select an hour.
-                                    </div>
                                 </div>
                                 <div class="col-6">
+                                    <label for="triggerMinute" class="visually-hidden">Minute</label>
                                     <select class="form-select" 
                                             id="triggerMinute" 
                                             name="triggerMinute" 
@@ -170,9 +156,6 @@
                                         <option value="30">30</option>
                                         <option value="45">45</option>
                                     </select>
-                                    <div class="invalid-feedback">
-                                        Please select a minute.
-                                    </div>
                                 </div>
                             </div>
                         </div>
@@ -183,13 +166,11 @@
                                 <button type="button" 
                                         class="btn btn-lg btn-outline-secondary" 
                                         id="cancelBtn">
-                                    <i class="bi bi-x-circle me-2"></i>
                                     Cancel
                                 </button>
                                 <button type="submit" 
                                         class="btn btn-lg btn-success" 
                                         id="createBtn">
-                                    <i class="bi bi-check-circle me-2"></i>
                                     Create Job
                                 </button>
                             </div>
