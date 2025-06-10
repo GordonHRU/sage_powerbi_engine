@@ -51,46 +51,172 @@ document.addEventListener('DOMContentLoaded', function() {
         }
     }
     
-    // Add search functionality to searchable selects
-    function makeSearchableSelect(selectElement) {
-        const options = Array.from(selectElement.options);
-        selectElement.addEventListener('input', function() {
-            const searchTerm = this.value.toLowerCase();
-            options.forEach(option => {
-                if (option.value === '') return;
-                const text = option.textContent.toLowerCase();
-                option.style.display = text.includes(searchTerm) ? '' : 'none';
+    // Initialize searchable dropdowns
+    function initSearchableDropdowns() {
+        document.querySelectorAll('.searchable-dropdown').forEach(dropdown => {
+            const searchInput = dropdown.querySelector('.searchable-input');
+            const hiddenInput = dropdown.querySelector('input[type="hidden"]');
+            const dropdownList = dropdown.querySelector('.dropdown-list');
+            const items = dropdownList.querySelectorAll('li');
+            
+            console.log('Initializing dropdown:', dropdown.dataset.field); // Debug
+            
+            // Show dropdown when input is clicked or focused
+            searchInput.addEventListener('focus', function() {
+                console.log('Input focused, showing dropdown'); // Debug
+                dropdown.classList.add('show');
+                dropdownList.classList.add('show');
+                showAllItems();
+            });
+            
+            searchInput.addEventListener('click', function() {
+                console.log('Input clicked, showing dropdown'); // Debug
+                dropdown.classList.add('show');
+                dropdownList.classList.add('show');
+                showAllItems();
+            });
+            
+            // Filter items when typing
+            searchInput.addEventListener('input', function() {
+                const filter = this.value.toLowerCase();
+                console.log('Filtering with:', filter); // Debug
+                let hasVisibleItems = false;
+                
+                items.forEach(item => {
+                    const text = item.textContent.toLowerCase();
+                    if (text.includes(filter)) {
+                        item.style.display = 'block';
+                        item.classList.remove('hidden');
+                        hasVisibleItems = true;
+                    } else {
+                        item.style.display = 'none';
+                        item.classList.add('hidden');
+                    }
+                });
+                
+                console.log('Has visible items:', hasVisibleItems); // Debug
+                
+                // Always show dropdown when typing
+                dropdown.classList.add('show');
+                dropdownList.classList.add('show');
+                
+                // Clear hidden input value when typing (unless exact match)
+                const exactMatch = Array.from(items).find(item => 
+                    item.textContent.toLowerCase() === filter.toLowerCase()
+                );
+                
+                if (exactMatch) {
+                    hiddenInput.value = exactMatch.getAttribute('data-value');
+                } else {
+                    hiddenInput.value = '';
+                }
+            });
+            
+            // Handle item selection
+            items.forEach(item => {
+                item.addEventListener('click', function(e) {
+                    e.preventDefault();
+                    e.stopPropagation();
+                    
+                    const value = this.getAttribute('data-value');
+                    const text = this.textContent;
+                    
+                    console.log('Item selected:', value, text); // Debug
+                    
+                    searchInput.value = text;
+                    hiddenInput.value = value;
+                    
+                    hideDropdown();
+                    
+                    // Clear any validation errors
+                    if (hiddenInput.classList.contains('is-invalid')) {
+                        hideError(hiddenInput);
+                    }
+                });
+            });
+            
+            // Show all items
+            function showAllItems() {
+                items.forEach(item => {
+                    item.style.display = 'block';
+                    item.classList.remove('hidden');
+                });
+            }
+            
+            // Hide dropdown
+            function hideDropdown() {
+                dropdown.classList.remove('show');
+                dropdownList.classList.remove('show');
+            }
+            
+            // Close dropdown when clicking outside
+            document.addEventListener('click', function(e) {
+                if (!dropdown.contains(e.target)) {
+                    hideDropdown();
+                }
+            });
+            
+            // Handle keyboard navigation (optional enhancement)
+            searchInput.addEventListener('keydown', function(e) {
+                if (e.key === 'ArrowDown' || e.key === 'ArrowUp') {
+                    e.preventDefault();
+                    // Could add keyboard navigation here if needed
+                }
+                if (e.key === 'Escape') {
+                    hideDropdown();
+                }
             });
         });
     }
     
-    // Apply search functionality to searchable selects
-    document.querySelectorAll('.searchable-select').forEach(makeSearchableSelect);
+    // Initialize searchable dropdowns
+    initSearchableDropdowns();
+    
+    // Remove the old searchable select function
+    // document.querySelectorAll('.searchable-select').forEach(makeSearchableSelect);
     
     // Real-time validation
     function validateField(field) {
         const value = field.value.trim();
-        const isValid = value !== '';
         
         if (field.id === 'triggerHour' || field.id === 'triggerMinute') {
             const hour = document.getElementById('triggerHour').value;
             const minute = document.getElementById('triggerMinute').value;
-            const timeIsValid = hour !== '' && minute !== '';
             
-            if (!timeIsValid) {
+            // Validate hour
+            const hourNum = parseInt(hour);
+            const isHourValid = hour !== '' && !isNaN(hourNum) && hourNum >= 0 && hourNum <= 23;
+            
+            // Validate minute
+            const minuteNum = parseInt(minute);
+            const isMinuteValid = minute !== '' && !isNaN(minuteNum) && minuteNum >= 0 && minuteNum <= 59;
+            
+            // Handle hour validation
+            if (!isHourValid) {
                 if (hour === '') {
-                    showError(document.getElementById('triggerHour'), errorMessages['triggerHour']);
-                }
-                if (minute === '') {
-                    showError(document.getElementById('triggerMinute'), errorMessages['triggerMinute']);
+                    showError(document.getElementById('triggerHour'), 'Please enter an hour.');
+                } else {
+                    showError(document.getElementById('triggerHour'), 'Hour must be between 0 and 23.');
                 }
             } else {
                 hideError(document.getElementById('triggerHour'));
+            }
+            
+            // Handle minute validation
+            if (!isMinuteValid) {
+                if (minute === '') {
+                    showError(document.getElementById('triggerMinute'), 'Please enter a minute.');
+                } else {
+                    showError(document.getElementById('triggerMinute'), 'Minute must be between 0 and 59.');
+                }
+            } else {
                 hideError(document.getElementById('triggerMinute'));
             }
             
-            return timeIsValid;
+            return isHourValid && isMinuteValid;
         }
+        
+        const isValid = value !== '';
         
         if (!isValid) {
             showError(field, errorMessages[field.id]);
@@ -105,26 +231,53 @@ document.addEventListener('DOMContentLoaded', function() {
     form.querySelectorAll('[required]').forEach(field => {
         let hasBeenFocused = false;
         
-        // Track when field has been focused
+        // Check if this is a hidden input from searchable dropdown
+        if (field.type === 'hidden') {
+            const dropdown = field.closest('.searchable-dropdown');
+            if (dropdown) {
+                const searchInput = dropdown.querySelector('.searchable-input');
+                if (searchInput) {
+                    // Track focus on the search input instead
+                    searchInput.addEventListener('focus', function() {
+                        hasBeenFocused = true;
+                    });
+                    
+                    searchInput.addEventListener('blur', function() {
+                        if (hasBeenFocused) {
+                            setTimeout(() => validateField(field), 200);
+                        }
+                    });
+                    
+                    // Validate when value changes
+                    const observer = new MutationObserver(function() {
+                        if (hasBeenFocused) {
+                            validateField(field);
+                        }
+                    });
+                    observer.observe(field, { attributes: true, attributeFilter: ['value'] });
+                    
+                    return; // Skip the regular validation setup for hidden fields
+                }
+            }
+        }
+        
+        // Regular validation setup for other fields
         field.addEventListener('focus', function() {
             hasBeenFocused = true;
         });
         
-        // Only validate after field has been focused and then blurred
         field.addEventListener('blur', function() {
             if (hasBeenFocused) {
                 validateField(field);
             }
         });
         
-        // Clear validation errors when user starts typing (after being focused)
         field.addEventListener('input', function() {
             if (hasBeenFocused && field.classList.contains('is-invalid')) {
                 validateField(field);
             }
         });
         
-        // For select fields, also listen to change events
         if (field.tagName === 'SELECT') {
             field.addEventListener('change', function() {
                 if (hasBeenFocused) {

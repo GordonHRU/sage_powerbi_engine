@@ -54,3 +54,70 @@
     background-position: right calc(0.375em + 0.1875rem) center;
     background-size: calc(0.75em + 0.375rem) calc(0.75em + 0.375rem);
 }
+
+/* Time input styling */
+input[type="number"] {
+    /* Don't hide the spinner arrows - remove the previous styling */
+}
+
+/* Remove the webkit spinner hiding */
+input[type="number"]::-webkit-outer-spin-button,
+input[type="number"]::-webkit-inner-spin-button {
+    /* Let the default spinner arrows show */
+    -webkit-appearance: auto;
+}
+
+.time-input-container {
+    position: relative;
+}
+
+.time-input-container .form-control {
+    text-align: center;
+    font-weight: 500;
+    font-size: 16px;
+    /* Reserve space for validation icon on the right */
+    padding-right: calc(1.5em + 0.75rem);
+}
+
+.time-input-container .form-control:focus {
+    border-color: #0066cc;
+    box-shadow: 0 0 0 0.2rem rgba(0, 102, 204, 0.25);
+}
+
+/* Override the is-invalid padding for time inputs to prevent double padding */
+.time-input-container .form-control.is-invalid {
+    padding-right: calc(1.5em + 0.75rem);
+    background-image: url("data:image/svg+xml,%3csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 12 12' width='12' height='12' fill='none' stroke='%23dc3545'%3e%3ccircle cx='6' cy='6' r='4.5'/%3e%3cpath d='m5.8 3.6h.4L6 6.5z'/%3e%3ccircle cx='6' cy='8.2' r='.6' fill='%23dc3545' stroke='none'/%3e%3c/svg%3e");
+    background-repeat: no-repeat;
+    background-position: right calc(0.375em + 0.1875rem) center;
+    background-size: calc(0.75em + 0.375rem) calc(0.75em + 0.375rem);
+}
+
+/* Searchable select styling */
+.position-relative {
+    position: relative !important;
+}
+
+.searchable-input {
+    background-color: white;
+    cursor: text;
+}
+
+.searchable-input:focus {
+    border-color: #0066cc;
+    box-shadow: 0 0 0 0.2rem rgba(0, 102, 204, 0.25);
+}
+
+/* Dropdown styling for searchable selects */
+select[style*="position: absolute"] {
+    box-shadow: 0 0.5rem 1rem rgba(0, 0, 0, 0.15) !important;
+    border: 1px solid #ced4da !important;
+}
+
+select[style*="position: absolute"] option {
+    padding: 8px 12px;
+}
+
+select[style*="position: absolute"] option:hover {
+    background-color: #f8f9fa;
+}
