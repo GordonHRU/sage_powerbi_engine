@@ -1,0 +1,58 @@
+# Python 編譯檔案
+__pycache__/
+*.py[cod]
+*$py.class
+
+# 虛擬環境
+venv/
+env/
+ENV/
+
+# IDE 相關
+.idea/
+.vscode/
+*.swp
+*.swo
+
+# 資料庫
+*.db
+*.sqlite3
+
+# 日誌檔案
+*.log
+
+# 環境變數
+.env
+.env.local
+
+# 系統檔案
+.DS_Store
+Thumbs.db
+
+# 暫存檔案
+*.tmp
+*.bak
+*.swp
+
+# 測試覆蓋率報告
+.coverage
+htmlcov/
+
+# 分發檔案
+dist/
+build/
+*.egg-info/
+
+# 本地設定
+local_settings.py
+
+# 媒體檔案
+media/
+
+# 靜態檔案
+static/
+
+# 其他
+*.pid
+*.seed
+*.pid.lock 

@@ -31,7 +31,7 @@ def execute_powerbi_engine(program, execution_id):
     try:
         # 設置超時時間（1小時）
         timeout = 3600
-        start_time = time.time()
+
         
         # 構建程式參數
         program_params = {
@@ -65,62 +65,27 @@ def execute_powerbi_engine(program, execution_id):
             errors='replace'
         )
         
-        # 即時讀取輸出
-        output = []
-        error = []
-        
-        while True:
-            # 檢查是否超時
-            if time.time() - start_time > timeout:
-                process.kill()
-                return False, "Execution timed out (over 1 hour)."
-            
-            # 讀取輸出
-            stdout_line = process.stdout.readline()
-            stderr_line = process.stderr.readline()
-            
-            if stdout_line:
-                output.append(stdout_line.strip())
-            if stderr_line:
-                error.append(stderr_line.strip())
-            
-            # 檢查進程是否結束
-            if process.poll() is not None:
-                break
-            
-            # 短暫休息以避免 CPU 過度使用
-            time.sleep(0.1)
-        
-        # 獲取剩餘輸出
-        remaining_stdout, remaining_stderr = process.communicate()
-        if remaining_stdout:
-            output.extend(remaining_stdout.splitlines())
-        if remaining_stderr:
-            error.extend(remaining_stderr.splitlines())
-        
-        stdout_str = '\n'.join(output)
-        stderr_str = '\n'.join(error)
+        # 等待進程完成或超時
+        try:
+            stdout, stderr = process.communicate(timeout=timeout)
+        except subprocess.TimeoutExpired:
+            process.kill()
+            stdout, stderr = process.communicate()
+            return False, "Execution timed out (over 1 hour)."
         
         # 更新執行記錄
         execution = JobExecution.objects.get(execution_id=execution_id)
-        execution.output = stdout_str
-        execution.error = stderr_str
+        execution.output = stdout
+        execution.error = stderr
         execution.status = 'completed' if process.returncode == 0 else 'failed'
         execution.end_time = timezone.now()
         execution.save()
         
-        if process.returncode == 0:
-            logger.info(f"Power BI Engine execution successful: {program.program_name}")
-            logger.debug(f"Output: {stdout_str}")
-            return True, stdout_str or "Execution completed successfully"
-        else:
-            logger.error(f"Power BI Engine execution failed: {program.program_name}")
-            logger.error(f"Error: {stderr_str}")
-            return False, stderr_str or "Unknown error occurred"
+        return process.returncode == 0, stdout or stderr
             
     except Exception as e:
         logger.error(f"Error executing Power BI Engine: {str(e)}")
-        return False, str(e) or "Unknown error occurred"
+        return False, str(e)
 
 def execute_job(job_id):
     try:
