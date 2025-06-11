@@ -1,7 +1,7 @@
 {% extends "base_with_sidebar.html" %}
 {% load static %}
 
-{% block title %}Create New Job - Power BI Automation Engine{% endblock %}
+{% block title %}New Scheduled Job - Power BI Automation Engine{% endblock %}
 
 {% block breadcrumb %}
 <li class="breadcrumb-item">
@@ -10,10 +10,10 @@
 <li class="breadcrumb-item">
     <a href="{% url 'job_scheduler' %}">Job Scheduler</a>
 </li>
-<li class="breadcrumb-item active">Create New Job</li>
+<li class="breadcrumb-item active">New Scheduled Job</li>
 {% endblock %}
 
-{% block page_title %}Create New Scheduled Job{% endblock %}
+{% block page_title %}New Scheduled Job{% endblock %}
 
 {% block content %}
 <div class="container-fluid">
@@ -22,7 +22,6 @@
             <div class="card">
                 <div class="card-header">
                     <h5 class="mb-0">
-                        <i class="bi bi-plus-circle me-2"></i>
                         New Scheduled Job Details
                     </h5>
                 </div>
@@ -38,11 +37,8 @@
                                    class="form-control" 
                                    id="jobName" 
                                    name="jobName" 
-                                   placeholder="Enter job name"
+                                   placeholder="Enter Job Name"
                                    required>
-                            <div class="invalid-feedback">
-                                Please provide a valid job name.
-                            </div>
                         </div>
 
                         <!-- Program ID Field -->
@@ -54,7 +50,7 @@
                                     id="programId" 
                                     name="programId" 
                                     required>
-                                <option value="">Select Program ID</option>
+                                <option value="" disabled selected hidden>Select Program ID</option>
                                 <option value="PROG_001">PROG_001 - Sales Report Generator</option>
                                 <option value="PROG_002">PROG_002 - KPI Dashboard Builder</option>
                                 <option value="PROG_003">PROG_003 - Financial Report Engine</option>
@@ -66,9 +62,6 @@
                                 <option value="PROG_009">PROG_009 - HR Dashboard</option>
                                 <option value="PROG_010">PROG_010 - Supply Chain Analyzer</option>
                             </select>
-                            <div class="invalid-feedback">
-                                Please select a valid program ID.
-                            </div>
                         </div>
 
                         <!-- Property Name Field -->
@@ -80,7 +73,7 @@
                                     id="propertyName" 
                                     name="propertyName" 
                                     required>
-                                <option value="">Select Property Name</option>
+                                <option value="" disabled selected hidden>Select Property Name</option>
                                 <option value="SalesReportConfig">SalesReportConfig</option>
                                 <option value="KPIDashboardSettings">KPIDashboardSettings</option>
                                 <option value="FinancialReportTemplate">FinancialReportTemplate</option>
@@ -94,9 +87,6 @@
                                 <option value="DataWarehouseSettings">DataWarehouseSettings</option>
                                 <option value="ReportingEngineConfig">ReportingEngineConfig</option>
                             </select>
-                            <div class="invalid-feedback">
-                                Please select a valid property name.
-                            </div>
                         </div>
 
                         <!-- Trigger Frequency Field -->
@@ -108,73 +98,49 @@
                                     id="triggerFrequency" 
                                     name="triggerFrequency" 
                                     required>
-                                <option value="">Select Frequency</option>
+                                <option value="" disabled selected hidden>Select Frequency</option>
                                 <option value="Daily">Daily</option>
                                 <option value="Weekly">Weekly</option>
                                 <option value="Monthly">Monthly</option>
                             </select>
-                            <div class="invalid-feedback">
-                                Please select a trigger frequency.
-                            </div>
                         </div>
 
                         <!-- Trigger Time Field -->
                         <div class="mb-4">
-                            <label for="triggerTime" class="form-label required-field">
+                            <label class="form-label required-field">
                                 Trigger Time <span class="text-danger">*</span>
                             </label>
                             <div class="row">
                                 <div class="col-6">
-                                    <select class="form-select" 
-                                            id="triggerHour" 
-                                            name="triggerHour" 
-                                            required>
-                                        <option value="">Hour</option>
-                                        <option value="00">00</option>
-                                        <option value="01">01</option>
-                                        <option value="02">02</option>
-                                        <option value="03">03</option>
-                                        <option value="04">04</option>
-                                        <option value="05">05</option>
-                                        <option value="06">06</option>
-                                        <option value="07">07</option>
-                                        <option value="08">08</option>
-                                        <option value="09">09</option>
-                                        <option value="10">10</option>
-                                        <option value="11">11</option>
-                                        <option value="12">12</option>
-                                        <option value="13">13</option>
-                                        <option value="14">14</option>
-                                        <option value="15">15</option>
-                                        <option value="16">16</option>
-                                        <option value="17">17</option>
-                                        <option value="18">18</option>
-                                        <option value="19">19</option>
-                                        <option value="20">20</option>
-                                        <option value="21">21</option>
-                                        <option value="22">22</option>
-                                        <option value="23">23</option>
-                                    </select>
-                                    <div class="invalid-feedback">
-                                        Please select an hour.
+                                    <label for="triggerHour" class="form-label small text-muted">Hour (0-23)</label>
+                                    <div class="time-input-container">
+                                        <input type="number" 
+                                               class="form-control" 
+                                               id="triggerHour" 
+                                               name="triggerHour" 
+                                               min="0" 
+                                               max="23" 
+                                               placeholder="00"
+                                               required>
                                     </div>
                                 </div>
                                 <div class="col-6">
-                                    <select class="form-select" 
-                                            id="triggerMinute" 
-                                            name="triggerMinute" 
-                                            required>
-                                        <option value="">Minute</option>
-                                        <option value="00">00</option>
-                                        <option value="15">15</option>
-                                        <option value="30">30</option>
-                                        <option value="45">45</option>
-                                    </select>
-                                    <div class="invalid-feedback">
-                                        Please select a minute.
+                                    <label for="triggerMinute" class="form-label small text-muted">Minute (0-59)</label>
+                                    <div class="time-input-container">
+                                        <input type="number" 
+                                               class="form-control" 
+                                               id="triggerMinute" 
+                                               name="triggerMinute" 
+                                               min="0" 
+                                               max="59" 
+                                               placeholder="00"
+                                               required>
                                     </div>
                                 </div>
                             </div>
+                            <small class="form-text text-muted mt-1">
+                                Enter time in 24-hour format (e.g., 14:30 for 2:30 PM)
+                            </small>
                         </div>
 
                         <!-- Form Buttons -->
@@ -183,13 +149,11 @@
                                 <button type="button" 
                                         class="btn btn-lg btn-outline-secondary" 
                                         id="cancelBtn">
-                                    <i class="bi bi-x-circle me-2"></i>
                                     Cancel
                                 </button>
                                 <button type="submit" 
                                         class="btn btn-lg btn-success" 
                                         id="createBtn">
-                                    <i class="bi bi-check-circle me-2"></i>
                                     Create Job
                                 </button>
                             </div>
