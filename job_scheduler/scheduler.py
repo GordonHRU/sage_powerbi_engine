@@ -10,8 +10,14 @@ import os
 import json
 from datetime import datetime
 import time
+from django.db import transaction
+from threading import Lock
+from django.core.cache import cache
 
 logger = logging.getLogger(__name__)
+
+# 創建一個鎖來控制資料庫訪問
+db_lock = Lock()
 
 def calculate_next_run_time(cron_expression):
     """
@@ -31,9 +37,8 @@ def execute_powerbi_engine(program, execution_id):
     try:
         # 設置超時時間（1小時）
         timeout = 3600
-
         
-        # 構建程式參數
+        # 構建程式參數並轉換為 JSON
         program_params = {
             'workspace_id': program.workspace_id,
             'report_name': program.report_name,
@@ -73,14 +78,6 @@ def execute_powerbi_engine(program, execution_id):
             stdout, stderr = process.communicate()
             return False, "Execution timed out (over 1 hour)."
         
-        # 更新執行記錄
-        execution = JobExecution.objects.get(execution_id=execution_id)
-        execution.output = stdout
-        execution.error = stderr
-        execution.status = 'completed' if process.returncode == 0 else 'failed'
-        execution.end_time = timezone.now()
-        execution.save()
-        
         return process.returncode == 0, stdout or stderr
             
     except Exception as e:
@@ -88,65 +85,65 @@ def execute_powerbi_engine(program, execution_id):
         return False, str(e)
 
 def execute_job(job_id):
+    """執行任務"""
     try:
-        job = JobScheduler.objects.get(job_id=job_id)
-        program = job.program  # Get Program object
-        
-        # Create execution record
-        execution = JobExecution.objects.create(job=job)
-        
-        try:
-            # Update last run time
+        with db_lock:  # 使用鎖保護資料庫操作
+            job = JobScheduler.objects.get(job_id=job_id)
+            execution = JobExecution.objects.create(
+                job=job,
+                status='running'
+            )
             job.last_run_time = timezone.now()
-            # Calculate and update next run time
             job.next_run_time = job.calculate_next_run_time()
             job.save()
-            
-            # Execute task
-            success, message = execute_powerbi_engine(program, execution.execution_id)
-            
-            # Update execution record
+        
+        # 執行任務
+        result = execute_powerbi_engine(job.program, execution.execution_id)
+        
+        # 更新執行狀態
+        with db_lock:
+            execution.status = 'completed' if result[0] else 'failed'
+            if not result[0]:
+                execution.error = result[1]
             execution.end_time = timezone.now()
-            execution.status = 'completed' if success else 'failed'
-            execution.output = message if success else ''
-            execution.error = '' if success else message
             execution.save()
-            
-            logger.info(f"Job execution: {job.job_name} - {'Success' if success else 'Failed'}")
-            
-        except Exception as e:
-            # Update execution record as failed
-            execution.end_time = timezone.now()
-            execution.status = 'failed'
-            execution.error = str(e)
-            execution.save()
-            raise
-            
-    except JobScheduler.DoesNotExist:
-        logger.error(f"Job not found with ID: {job_id}")
+        
     except Exception as e:
-        logger.error(f"Job execution failed: {str(e)}")
+        logger.error(f"Error executing job {job_id}: {str(e)}")
+        if execution:
+            with db_lock:
+                execution.status = 'failed'
+                execution.error = str(e)
+                execution.end_time = timezone.now()
+                execution.save()
 
 def init_scheduler():
     scheduler = BackgroundScheduler()
     scheduler.add_jobstore(DjangoJobStore(), "default")
     
-    # Load all enabled jobs from database
-    jobs = JobScheduler.objects.filter(enabled=True)
+    # 使用快取獲取啟用的任務
+    cache_key = 'enabled_jobs'
+    jobs = cache.get(cache_key)
+    
+    if not jobs:
+        with db_lock:  # 使用鎖保護資料庫操作
+            jobs = JobScheduler.objects.filter(enabled=True)
+            cache.set(cache_key, list(jobs), 300)  # 快取 5 分鐘
+    
     for job in jobs:
         try:
-            # Calculate and update next run time
-            job.next_run_time = job.calculate_next_run_time()
-            job.save()
+            with db_lock:  # 使用鎖保護資料庫操作
+                job.next_run_time = job.calculate_next_run_time()
+                job.save()
             
-            # Add the scheduled job
             scheduler.add_job(
                 execute_job,
                 CronTrigger.from_crontab(job.cron_expression),
                 id=str(job.job_id),
                 name=job.job_name,
                 args=[job.job_id],
-                replace_existing=True
+                replace_existing=True,
+                max_instances=1
             )
             
             logger.info(f"Added scheduled job: {job.job_name}")
