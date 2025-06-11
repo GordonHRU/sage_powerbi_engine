@@ -1,0 +1,15 @@
+2025-06-11 02:50:00,853 - __main__ - INFO - Start Power BI Engine, execution ID: 071dcfdc-0525-4e00-84d8-b51958ab125b
+2025-06-11 02:50:00,853 - __main__ - INFO - Job parameters: {"workspace_id": "xxxx.xxxx.xxxx.xxxx", "report_name": "report01", "dataset_id": "xxxx.xxxx.xxxx.xxxx", "method": "email", "output_name": "reportOutput", "output_type": ".txt", "sharepoint_site": "test", "sharepoint_path": "test", "filelocation": "test", "execution_id": "071dcfdc-0525-4e00-84d8-b51958ab125b"}
+2025-06-11 02:50:00,853 - __main__ - INFO - Processing... 8.3% complete
+2025-06-11 02:50:05,868 - __main__ - INFO - Processing... 16.7% complete
+2025-06-11 02:50:10,878 - __main__ - INFO - Processing... 25.0% complete
+2025-06-11 02:50:15,886 - __main__ - INFO - Processing... 33.3% complete
+2025-06-11 02:50:20,899 - __main__ - INFO - Processing... 41.7% complete
+2025-06-11 02:50:25,905 - __main__ - INFO - Processing... 50.0% complete
+2025-06-11 02:50:30,915 - __main__ - INFO - Processing... 58.3% complete
+2025-06-11 02:50:35,927 - __main__ - INFO - Processing... 66.7% complete
+2025-06-11 02:50:40,935 - __main__ - INFO - Processing... 75.0% complete
+2025-06-11 02:50:45,947 - __main__ - INFO - Processing... 83.3% complete
+2025-06-11 02:50:50,951 - __main__ - INFO - Processing... 91.7% complete
+2025-06-11 02:50:55,965 - __main__ - INFO - Processing... 100.0% complete
+2025-06-11 02:51:00,979 - __main__ - INFO - Power BI Engine completed successfully, ID: 071dcfdc-0525-4e00-84d8-b51958ab125b

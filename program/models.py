@@ -19,4 +19,9 @@ class Program(models.Model):
     updated_at = models.DateTimeField(auto_now=True)
 
     def __str__(self):
-        return self.name
+        return f"{self.program_name} (ID: {self.program_id})"
+
+    class Meta:
+        verbose_name = 'Power BI Program'
+        verbose_name_plural = 'Power BI Programs'
+        ordering = ['-created_at']
