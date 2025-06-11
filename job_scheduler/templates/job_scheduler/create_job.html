@@ -43,50 +43,52 @@
 
                         <!-- Program ID Field -->
                         <div class="mb-4">
-                            <label for="programId" class="form-label required-field">
+                            <label for="programId-search" class="form-label required-field">
                                 Program ID <span class="text-danger">*</span>
                             </label>
-                            <select class="form-select searchable-select" 
-                                    id="programId" 
-                                    name="programId" 
-                                    required>
-                                <option value="" disabled selected hidden>Select Program ID</option>
-                                <option value="PROG_001">PROG_001 - Sales Report Generator</option>
-                                <option value="PROG_002">PROG_002 - KPI Dashboard Builder</option>
-                                <option value="PROG_003">PROG_003 - Financial Report Engine</option>
-                                <option value="PROG_004">PROG_004 - Business Analytics Tool</option>
-                                <option value="PROG_005">PROG_005 - Customer Data Processor</option>
-                                <option value="PROG_006">PROG_006 - Inventory Tracker</option>
-                                <option value="PROG_007">PROG_007 - Performance Monitor</option>
-                                <option value="PROG_008">PROG_008 - Marketing Analytics</option>
-                                <option value="PROG_009">PROG_009 - HR Dashboard</option>
-                                <option value="PROG_010">PROG_010 - Supply Chain Analyzer</option>
-                            </select>
+                            <div class="searchable-dropdown" data-field="programId">
+                                <div class="input-group">
+                                    <input type="text" 
+                                           class="form-control searchable-input" 
+                                           id="programId-search"
+                                           placeholder="Search Program ID..."
+                                           autocomplete="off">
+                                    <span class="input-group-text dropdown-arrow">
+                                        <i class="bi bi-chevron-down"></i>
+                                    </span>
+                                </div>
+                                <input type="hidden" 
+                                       id="programId" 
+                                       name="programId" 
+                                       required>
+                                <!-- Dropdown list will be populated by JavaScript -->
+                                <ul class="dropdown-list"></ul>
+                            </div>
                         </div>
 
                         <!-- Property Name Field -->
                         <div class="mb-4">
-                            <label for="propertyName" class="form-label required-field">
+                            <label for="propertyName-search" class="form-label required-field">
                                 Property Name <span class="text-danger">*</span>
                             </label>
-                            <select class="form-select searchable-select" 
-                                    id="propertyName" 
-                                    name="propertyName" 
-                                    required>
-                                <option value="" disabled selected hidden>Select Property Name</option>
-                                <option value="SalesReportConfig">SalesReportConfig</option>
-                                <option value="KPIDashboardSettings">KPIDashboardSettings</option>
-                                <option value="FinancialReportTemplate">FinancialReportTemplate</option>
-                                <option value="QuarterlyAnalysisConfig">QuarterlyAnalysisConfig</option>
-                                <option value="CustomerDataProcessing">CustomerDataProcessing</option>
-                                <option value="InventoryTrackingSettings">InventoryTrackingSettings</option>
-                                <option value="PerformanceMetricsConfig">PerformanceMetricsConfig</option>
-                                <option value="MarketingCampaignSettings">MarketingCampaignSettings</option>
-                                <option value="HRAnalyticsTemplate">HRAnalyticsTemplate</option>
-                                <option value="SupplyChainConfiguration">SupplyChainConfiguration</option>
-                                <option value="DataWarehouseSettings">DataWarehouseSettings</option>
-                                <option value="ReportingEngineConfig">ReportingEngineConfig</option>
-                            </select>
+                            <div class="searchable-dropdown" data-field="propertyName">
+                                <div class="input-group">
+                                    <input type="text" 
+                                           class="form-control searchable-input" 
+                                           id="propertyName-search"
+                                           placeholder="Search Property Name..."
+                                           autocomplete="off">
+                                    <span class="input-group-text dropdown-arrow">
+                                        <i class="bi bi-chevron-down"></i>
+                                    </span>
+                                </div>
+                                <input type="hidden" 
+                                       id="propertyName" 
+                                       name="propertyName" 
+                                       required>
+                                <!-- Dropdown list will be populated by JavaScript -->
+                                <ul class="dropdown-list"></ul>
+                            </div>
                         </div>
 
                         <!-- Trigger Frequency Field -->
@@ -154,7 +156,7 @@
                                 <button type="submit" 
                                         class="btn btn-lg btn-success" 
                                         id="createBtn">
-                                    Create Job
+                                    Create
                                 </button>
                             </div>
                         </div>

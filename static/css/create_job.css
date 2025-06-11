@@ -39,7 +39,7 @@
 }
 
 .invalid-feedback {
-    display: block;
+    display: none;
     width: 100%;
     margin-top: 0.25rem;
     font-size: 0.875rem;
@@ -53,6 +53,145 @@
     background-repeat: no-repeat;
     background-position: right calc(0.375em + 0.1875rem) center;
     background-size: calc(0.75em + 0.375rem) calc(0.75em + 0.375rem);
+}
+
+.is-invalid + .invalid-feedback {
+    display: block;
+}
+
+/* Ensure error messages for dropdowns appear and don't affect positioning */
+.searchable-dropdown + .invalid-feedback {
+    display: block;
+}
+
+/* Searchable dropdown styling */
+.searchable-dropdown {
+    position: relative;
+    /* Ensure dropdown container doesn't grow with error messages */
+    margin-bottom: 0;
+}
+
+.searchable-dropdown .input-group {
+    position: relative;
+}
+
+.searchable-dropdown .dropdown-arrow {
+    background-color: #f8f9fa;
+    border-left: 1px solid #ced4da;
+    cursor: pointer;
+    transition: all 0.15s ease-in-out;
+    user-select: none;
+}
+
+.searchable-dropdown .dropdown-arrow:hover {
+    background-color: #e9ecef;
+}
+
+.searchable-dropdown.show .dropdown-arrow {
+    border-radius: 0 0.375rem 0 0;
+}
+
+.searchable-dropdown .dropdown-arrow i {
+    transition: transform 0.15s ease-in-out;
+    color: #6c757d;
+}
+
+.searchable-dropdown.show .dropdown-arrow i {
+    transform: rotate(180deg);
+}
+
+.searchable-dropdown .dropdown-list {
+    display: none !important;
+    visibility: hidden !important;
+    opacity: 0 !important;
+    position: absolute;
+    top: 100%;
+    left: 0;
+    right: 0;
+    z-index: 1000;
+    background-color: white;
+    border: 1px solid #ced4da;
+    border-top: none;
+    border-radius: 0 0 0.375rem 0.375rem;
+    max-height: 200px;
+    overflow-y: auto;
+    overflow-x: hidden;
+    list-style: none;
+    padding: 0;
+    margin: 0;
+    box-shadow: 0 0.125rem 0.25rem rgba(0, 0, 0, 0.075);
+    transition: opacity 0.15s ease-in-out;
+}
+
+/* Show dropdown when opened */
+.searchable-dropdown.show .dropdown-list {
+    display: block !important;
+    visibility: visible !important;
+    opacity: 1 !important;
+}
+
+/* Simple list item styling */
+.dropdown-list li {
+    padding: 8px 12px;
+    cursor: pointer;
+    border-bottom: 1px solid #f8f9fa;
+    transition: background-color 0.15s ease-in-out;
+    font-size: 14px;
+    line-height: 1.4;
+    display: block;
+}
+
+.dropdown-list li:hover,
+.dropdown-list li:focus {
+    background-color: #f8f9fa;
+    outline: none;
+}
+
+.dropdown-list li:last-child {
+    border-bottom: none;
+}
+
+/* The key fix: Override the default display with inline styles */
+.dropdown-list li[style*="display: none"] {
+    display: none !important;
+}
+
+.searchable-dropdown .searchable-input {
+    border-radius: 0.375rem 0 0 0.375rem;
+    cursor: text;
+}
+
+.searchable-dropdown .searchable-input:focus {
+    border-color: #0066cc;
+    box-shadow: 0 0 0 0.2rem rgba(0, 102, 204, 0.25);
+    z-index: 3;
+    position: relative;
+}
+
+/* When dropdown is open, change input styling */
+.searchable-dropdown.show .searchable-input {
+    border-radius: 0.375rem 0 0 0;
+    border-bottom-color: #ced4da;
+}
+
+.searchable-dropdown.show .input-group {
+    border-radius: 0.375rem 0.375rem 0 0;
+}
+
+/* Ensure input group displays properly */
+.searchable-dropdown .input-group-text {
+    display: flex;
+    align-items: center;
+    padding: 0.375rem 0.75rem;
+    font-size: 1rem;
+    font-weight: 400;
+    line-height: 1.5;
+    color: #6c757d;
+    text-align: center;
+    white-space: nowrap;
+    background-color: #f8f9fa;
+    border: 1px solid #ced4da;
+    border-radius: 0 0.375rem 0.375rem 0;
 }
 
 /* Time input styling */
@@ -93,31 +232,18 @@ input[type="number"]::-webkit-inner-spin-button {
     background-size: calc(0.75em + 0.375rem) calc(0.75em + 0.375rem);
 }
 
-/* Searchable select styling */
-.position-relative {
-    position: relative !important;
+/* Ensure proper spacing for form fields with potential error messages */
+.mb-4 {
+    margin-bottom: 1.5rem !important;
+    min-height: 1rem; /* Reserve minimum space for error messages */
 }
 
-.searchable-input {
-    background-color: white;
-    cursor: text;
+/* Smooth transition for error message appearance */
+.invalid-feedback {
+    transition: opacity 0.15s ease-in-out;
+    opacity: 0;
 }
 
-.searchable-input:focus {
-    border-color: #0066cc;
-    box-shadow: 0 0 0 0.2rem rgba(0, 102, 204, 0.25);
-}
-
-/* Dropdown styling for searchable selects */
-select[style*="position: absolute"] {
-    box-shadow: 0 0.5rem 1rem rgba(0, 0, 0, 0.15) !important;
-    border: 1px solid #ced4da !important;
-}
-
-select[style*="position: absolute"] option {
-    padding: 8px 12px;
-}
-
-select[style*="position: absolute"] option:hover {
-    background-color: #f8f9fa;
+.invalid-feedback:not([style*="display: none"]) {
+    opacity: 1;
 }

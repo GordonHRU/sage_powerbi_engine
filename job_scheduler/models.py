@@ -13,7 +13,7 @@ class JobScheduler(models.Model):
     job_id = models.AutoField(primary_key=True)
     job_name = models.CharField(max_length=100, unique=True)
     program = models.ForeignKey(
-        Program, 
+        Program,
         on_delete=models.CASCADE,
         verbose_name='Program',
         help_text='Select a program to schedule',
