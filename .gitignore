@@ -15,15 +15,21 @@ ENV/
 *.swo
 
 # 資料庫
-*.db
-*.sqlite3
+# *.db
+# *.sqlite3
+# *.sqlite3-journal
+# db.sqlite3
+# db.sqlite3-journal
 
 # 日誌檔案
 *.log
+logs/
+log/
 
 # 環境變數
 .env
 .env.local
+.env.*
 
 # 系統檔案
 .DS_Store
@@ -45,14 +51,15 @@ build/
 
 # 本地設定
 local_settings.py
+settings_local.py
 
 # 媒體檔案
-media/
+# media/
 
 # 靜態檔案
-static/
+# static/
 
 # 其他
 *.pid
 *.seed
-*.pid.lock 
+*.pid.lock
