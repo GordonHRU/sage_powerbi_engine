@@ -51,7 +51,7 @@
                                     <input type="text" 
                                            class="form-control searchable-input" 
                                            id="programId-search"
-                                           placeholder="Search Program ID..."
+                                           placeholder="Search Program ID"
                                            autocomplete="off">
                                     <span class="input-group-text dropdown-arrow">
                                         <i class="bi bi-chevron-down"></i>
@@ -76,7 +76,7 @@
                                     <input type="text" 
                                            class="form-control searchable-input" 
                                            id="propertyName-search"
-                                           placeholder="Search Property Name..."
+                                           placeholder="Search Property Name"
                                            autocomplete="off">
                                     <span class="input-group-text dropdown-arrow">
                                         <i class="bi bi-chevron-down"></i>
@@ -107,42 +107,109 @@
                             </select>
                         </div>
 
+                        <!-- Trigger Day Field (Weekly only) -->
+                        <div class="mb-4" id="triggerDayContainer" style="display: none;">
+                            <label for="triggerDay" class="form-label required-field">
+                                Trigger Day <span class="text-danger">*</span>
+                            </label>
+                            <select class="form-select" 
+                                    id="triggerDay" 
+                                    name="triggerDay">
+                                <option value="" disabled selected hidden>Select Day of Week</option>
+                                <option value="Monday">Monday</option>
+                                <option value="Tuesday">Tuesday</option>
+                                <option value="Wednesday">Wednesday</option>
+                                <option value="Thursday">Thursday</option>
+                                <option value="Friday">Friday</option>
+                                <option value="Saturday">Saturday</option>
+                                <option value="Sunday">Sunday</option>
+                            </select>
+                        </div>
+
+                        <!-- Trigger Date Field (Monthly only) -->
+                        <div class="mb-4" id="triggerDateContainer" style="display: none;">
+                            <label for="triggerDate" class="form-label required-field">
+                                Trigger Date <span class="text-danger">*</span>
+                            </label>
+                            <select class="form-select" 
+                                    id="triggerDate" 
+                                    name="triggerDate">
+                                <option value="" disabled selected hidden>Select Day of Month</option>
+                                <option value="1">1</option>
+                                <option value="2">2</option>
+                                <option value="3">3</option>
+                                <option value="4">4</option>
+                                <option value="5">5</option>
+                                <option value="6">6</option>
+                                <option value="7">7</option>
+                                <option value="8">8</option>
+                                <option value="9">9</option>
+                                <option value="10">10</option>
+                                <option value="11">11</option>
+                                <option value="12">12</option>
+                                <option value="13">13</option>
+                                <option value="14">14</option>
+                                <option value="15">15</option>
+                                <option value="16">16</option>
+                                <option value="17">17</option>
+                                <option value="18">18</option>
+                                <option value="19">19</option>
+                                <option value="20">20</option>
+                                <option value="21">21</option>
+                                <option value="22">22</option>
+                                <option value="23">23</option>
+                                <option value="24">24</option>
+                                <option value="25">25</option>
+                                <option value="26">26</option>
+                                <option value="27">27</option>
+                                <option value="28">28</option>
+                                <option value="29">29</option>
+                                <option value="30">30</option>
+                                <option value="31">31</option>
+                            </select>
+                            <small class="form-text text-muted mt-1">
+                                If the selected date doesn't exist in a month (e.g., 31st in February), the job will run on the last day of that month.
+                            </small>
+                        </div>
+
                         <!-- Trigger Time Field -->
                         <div class="mb-4">
-                            <label class="form-label required-field">
-                                Trigger Time <span class="text-danger">*</span>
-                            </label>
-                            <div class="row">
-                                <div class="col-6">
-                                    <label for="triggerHour" class="form-label small text-muted">Hour (0-23)</label>
-                                    <div class="time-input-container">
-                                        <input type="number" 
-                                               class="form-control" 
-                                               id="triggerHour" 
-                                               name="triggerHour" 
-                                               min="0" 
-                                               max="23" 
-                                               placeholder="00"
-                                               required>
+                            <fieldset>
+                                <legend class="form-label required-field">
+                                    Trigger Time <span class="text-danger">*</span>
+                                </legend>
+                                <div class="row">
+                                    <div class="col-6">
+                                        <label for="triggerHour" class="form-label small text-muted">Hour (0-23)</label>
+                                        <div class="time-input-container">
+                                            <input type="number" 
+                                                   class="form-control" 
+                                                   id="triggerHour" 
+                                                   name="triggerHour" 
+                                                   min="0" 
+                                                   max="23" 
+                                                   placeholder="00"
+                                                   required>
+                                        </div>
+                                    </div>
+                                    <div class="col-6">
+                                        <label for="triggerMinute" class="form-label small text-muted">Minute (0-59)</label>
+                                        <div class="time-input-container">
+                                            <input type="number" 
+                                                   class="form-control" 
+                                                   id="triggerMinute" 
+                                                   name="triggerMinute" 
+                                                   min="0" 
+                                                   max="59" 
+                                                   placeholder="00"
+                                                   required>
+                                        </div>
                                     </div>
                                 </div>
-                                <div class="col-6">
-                                    <label for="triggerMinute" class="form-label small text-muted">Minute (0-59)</label>
-                                    <div class="time-input-container">
-                                        <input type="number" 
-                                               class="form-control" 
-                                               id="triggerMinute" 
-                                               name="triggerMinute" 
-                                               min="0" 
-                                               max="59" 
-                                               placeholder="00"
-                                               required>
-                                    </div>
-                                </div>
-                            </div>
-                            <small class="form-text text-muted mt-1">
-                                Enter time in 24-hour format (e.g., 14:30 for 2:30 PM)
-                            </small>
+                                <small class="form-text text-muted mt-1">
+                                    Enter time in 24-hour format (e.g., 14:30 for 2:30 PM)
+                                </small>
+                            </fieldset>
                         </div>
 
                         <!-- Form Buttons -->

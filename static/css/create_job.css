@@ -156,6 +156,57 @@
     display: none !important;
 }
 
+/* Fix fieldset legend to match form labels - with stronger selector */
+fieldset legend.form-label.required-field {
+    font-size: 1rem !important;
+    font-weight: 600 !important;
+    margin-bottom: 8px !important;
+    padding: 0 !important;
+    border: none !important;
+    width: auto !important;
+    float: none !important;
+}
+
+/* Conditional field animations */
+.conditional-field {
+    transition: all 0.3s ease-in-out;
+    overflow: hidden;
+}
+
+.conditional-field.hidden {
+    opacity: 0;
+    max-height: 0;
+    margin-bottom: 0 !important;
+    padding-top: 0;
+    padding-bottom: 0;
+}
+
+.conditional-field.visible {
+    opacity: 1;
+    max-height: 200px;
+}
+
+/* Smooth transitions for dynamic fields */
+#triggerDayContainer,
+#triggerDateContainer {
+    transition: all 0.3s ease-in-out;
+    overflow: hidden;
+}
+
+#triggerDayContainer.show,
+#triggerDateContainer.show {
+    opacity: 1;
+    max-height: 200px;
+}
+
+#triggerDayContainer.hide,
+#triggerDateContainer.hide {
+    opacity: 0;
+    max-height: 0;
+    margin-bottom: 0 !important;
+    padding: 0;
+}
+
 .searchable-dropdown .searchable-input {
     border-radius: 0.375rem 0 0 0.375rem;
     cursor: text;

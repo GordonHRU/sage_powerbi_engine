@@ -9,6 +9,8 @@ document.addEventListener('DOMContentLoaded', function() {
         'programId': 'Please select a valid program ID.',
         'propertyName': 'Please select a valid property name.',
         'triggerFrequency': 'Please select a trigger frequency.',
+        'triggerDay': 'Please select a day of the week.',
+        'triggerDate': 'Please select a day of the month.',
         'triggerHour': 'Please select an hour.',
         'triggerMinute': 'Please select a minute.'
     };
@@ -246,6 +248,43 @@ document.addEventListener('DOMContentLoaded', function() {
     // Initialize dropdowns
     initSearchableDropdowns();
     
+    // Handle dynamic frequency fields
+    function handleFrequencyChange() {
+        const frequency = document.getElementById('triggerFrequency').value;
+        const triggerDayContainer = document.getElementById('triggerDayContainer');
+        const triggerDateContainer = document.getElementById('triggerDateContainer');
+        const triggerDayField = document.getElementById('triggerDay');
+        const triggerDateField = document.getElementById('triggerDate');
+        
+        // Hide all conditional fields first
+        triggerDayContainer.style.display = 'none';
+        triggerDateContainer.style.display = 'none';
+        
+        // Remove required attribute from both
+        triggerDayField.removeAttribute('required');
+        triggerDateField.removeAttribute('required');
+        
+        // Clear values
+        triggerDayField.value = '';
+        triggerDateField.value = '';
+        
+        // Clear any existing errors
+        hideError(triggerDayField);
+        hideError(triggerDateField);
+        
+        // Show appropriate field based on frequency
+        if (frequency === 'Weekly') {
+            triggerDayContainer.style.display = 'block';
+            triggerDayField.setAttribute('required', 'required');
+        } else if (frequency === 'Monthly') {
+            triggerDateContainer.style.display = 'block';
+            triggerDateField.setAttribute('required', 'required');
+        }
+    }
+    
+    // Add event listener to trigger frequency
+    document.getElementById('triggerFrequency').addEventListener('change', handleFrequencyChange);
+    
     // Validation function
     function validateField(field) {
         const value = field.value.trim();
@@ -283,6 +322,34 @@ document.addEventListener('DOMContentLoaded', function() {
             return isHourValid && isMinuteValid;
         }
         
+        // Special validation for conditional fields
+        if (field.id === 'triggerDay') {
+            const frequency = document.getElementById('triggerFrequency').value;
+            const isRequired = frequency === 'Weekly';
+            
+            if (isRequired && value === '') {
+                showError(field, errorMessages[field.id]);
+                return false;
+            } else {
+                hideError(field);
+                return true;
+            }
+        }
+        
+        if (field.id === 'triggerDate') {
+            const frequency = document.getElementById('triggerFrequency').value;
+            const isRequired = frequency === 'Monthly';
+            
+            if (isRequired && value === '') {
+                showError(field, errorMessages[field.id]);
+                return false;
+            } else {
+                hideError(field);
+                return true;
+            }
+        }
+        
+        // Regular validation for other fields
         const isValid = value !== '';
         
         if (!isValid) {
@@ -295,7 +362,7 @@ document.addEventListener('DOMContentLoaded', function() {
     }
     
     // Add validation to required fields
-    form.querySelectorAll('[required]').forEach(field => {
+    form.querySelectorAll('[required], #triggerDay, #triggerDate').forEach(field => {
         let hasBeenBlurred = false;
         
         if (field.type === 'hidden') {
@@ -361,10 +428,23 @@ document.addEventListener('DOMContentLoaded', function() {
     
     // Form submission
     form.addEventListener('submit', function(e) {
-        const requiredFields = form.querySelectorAll('[required]');
+        // Get all currently required fields (including conditional ones)
+        const allFields = form.querySelectorAll('[required]');
+        const conditionalFields = [];
+        
+        // Add conditional fields if they should be required
+        const frequency = document.getElementById('triggerFrequency').value;
+        if (frequency === 'Weekly') {
+            conditionalFields.push(document.getElementById('triggerDay'));
+        } else if (frequency === 'Monthly') {
+            conditionalFields.push(document.getElementById('triggerDate'));
+        }
+        
+        // Combine all fields that need validation
+        const fieldsToValidate = [...allFields, ...conditionalFields];
         let isFormValid = true;
         
-        requiredFields.forEach(field => {
+        fieldsToValidate.forEach(field => {
             if (!validateField(field)) {
                 isFormValid = false;
             }
