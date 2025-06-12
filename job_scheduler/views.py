@@ -26,7 +26,7 @@ def create_job_view(request):
             # Extract form data
             job_name = request.POST.get('jobName', '').strip()
             program_id = request.POST.get('programId', '').strip()
-            property_name = request.POST.get('propertyName', '').strip()
+            properties_name = request.POST.get('propertiesName', '').strip()
             trigger_frequency = request.POST.get('triggerFrequency', '').strip()
             trigger_day = request.POST.get('triggerDay', '').strip()
             trigger_date = request.POST.get('triggerDate', '').strip()
@@ -39,8 +39,8 @@ def create_job_view(request):
                 errors.append('Job Name is required')
             if not program_id:
                 errors.append('Program ID is required')
-            if not property_name:
-                errors.append('Property Name is required')
+            if not properties_name:
+                errors.append('Properties Name is required')
             if not trigger_frequency:
                 errors.append('Trigger Frequency is required')
             if not trigger_hour or not trigger_minute:
@@ -144,14 +144,14 @@ def get_programs_and_properties(request):
     try:
         programs = Program.objects.all().values('program_id', 'program_name')
         
-        # Get unique property names from programs
-        # This assumes your Program model has a property_name field
+        # Get unique properties names from programs
+        # This assumes your Program model has a properties_name field
         # Adjust based on your actual Program model structure
-        property_names = Program.objects.values_list('property_name', flat=True).distinct()
+        properties_names = Program.objects.values_list('properties_name', flat=True).distinct()
         
         return JsonResponse({
             'programs': list(programs),
-            'properties': list(property_names)
+            'properties': list(properties_names)
         })
     except Exception as e:
         logger.error(f"Error fetching programs and properties: {str(e)}")

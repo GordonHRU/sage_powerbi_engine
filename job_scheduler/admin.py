@@ -12,14 +12,14 @@ logger = logging.getLogger(__name__)
 
 @admin.register(JobScheduler)
 class JobSchedulerAdmin(admin.ModelAdmin):
-    list_display = ('job_name', 'program', 'trigger_frequency', 'cron_expression', 'enabled', 'last_run_time', 'next_run_time')
-    list_filter = ('enabled', 'trigger_frequency')
+    list_display = ('job_name', 'program', 'cron_expression', 'enabled', 'last_run_time', 'next_run_time')
+    list_filter = ('enabled',)
     search_fields = ('job_name', 'program__program_name')
     readonly_fields = ('last_run_time', 'next_run_time', 'created_at', 'updated_at')
     
     fieldsets = (
         ('Basic Information', {
-            'fields': ('job_name', 'program', 'trigger_frequency', 'cron_expression', 'enabled')
+            'fields': ('job_name', 'program', 'cron_expression', 'enabled')
         }),
         ('Timing Information', {
             'fields': ('last_run_time', 'next_run_time', 'created_at', 'updated_at'),

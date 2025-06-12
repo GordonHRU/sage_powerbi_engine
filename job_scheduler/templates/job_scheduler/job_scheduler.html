@@ -26,7 +26,7 @@
 <div class="search-section">
     <div class="search-container">
         <img src="{% static 'image/NaviBarIcon/Search.png' %}" alt="Search" class="search-icon">
-        <input type="text" class="search-input" placeholder="Search Schedule...">
+        <input type="text" class="search-input" placeholder="Search Schedule">
     </div>
 </div>
 {% endblock %}
@@ -47,7 +47,7 @@
                                     <tr>
                                         <th>Job Name</th>
                                         <th>Program ID</th>
-                                        <th>Frequency</th>
+                                        <!-- <th>Frequency</th> -->
                                         <th>Last Run</th>
                                         <th>Next Run</th>
                                         <th>Actions</th>
@@ -58,7 +58,7 @@
                                     <tr>
                                         <td>{{ job.job_name }}</td>
                                         <td>{{ job.program.program_id }}</td>
-                                        <td>
+                                        <!-- <td>
                                             <span class="badge 
                                                 {% if job.trigger_frequency == 'Daily' %}bg-primary
                                                 {% elif job.trigger_frequency == 'Weekly' %}bg-success
@@ -67,7 +67,7 @@
                                                 {% endif %}">
                                                 {{ job.trigger_frequency }}
                                             </span>
-                                        </td>
+                                        </td> -->
                                         <td>
                                             {% if job.last_run_time %}
                                                 {{ job.last_run_time|date:"Y-m-d H:i" }}
@@ -93,11 +93,6 @@
                                                     data-job-name="{{ job.job_name|escapejs }}"
                                                     onclick="deleteJob(this.dataset.jobId, this.dataset.jobName)">
                                                 Delete
-                                            </button>
-                                            <button class="btn btn-sm btn-outline-info" 
-                                                    data-job-id="{{ job.job_id }}"
-                                                    onclick="viewHistory(this.dataset.jobId)">
-                                                History
                                             </button>
                                         </td>
                                     </tr>
@@ -187,11 +182,6 @@
             alert('Delete functionality will be implemented');
             modal.hide();
         };
-    }
-    
-    function viewHistory(jobId) {
-        // TODO: Implement history view
-        alert('History functionality will be implemented');
     }
 </script>
 {% endblock %}

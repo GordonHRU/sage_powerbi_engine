@@ -10,12 +10,6 @@ import logging
 logger = logging.getLogger(__name__)
 
 class JobScheduler(models.Model):
-    FREQUENCY_CHOICES = [
-        ('Daily', 'Daily'),
-        ('Weekly', 'Weekly'),
-        ('Monthly', 'Monthly'),
-    ]
-    
     job_id = models.AutoField(primary_key=True)
     job_name = models.CharField(max_length=100, unique=True)
     program = models.ForeignKey(
@@ -24,12 +18,6 @@ class JobScheduler(models.Model):
         verbose_name='Program',
         help_text='Select a program to schedule',
         related_name='scheduled_jobs'
-    )
-    trigger_frequency = models.CharField(
-        max_length=20,
-        choices=FREQUENCY_CHOICES,
-        default='Daily',
-        help_text='How often the job should run'
     )
     cron_expression = models.CharField(
         max_length=100,
