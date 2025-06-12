@@ -138,25 +138,6 @@ def generate_cron_expression(frequency, day, date, hour, minute):
         return None
 
 @require_http_methods(["GET"])
-def get_programs_and_properties(request):
-    """API endpoint to get programs and properties for dropdowns"""
-    try:
-        programs = Program.objects.all().values('program_id', 'program_name')
-        
-        # Get unique properties names from programs
-        # This assumes your Program model has a properties_name field
-        # Adjust based on your actual Program model structure
-        properties_names = Program.objects.values_list('properties_name', flat=True).distinct()
-        
-        return JsonResponse({
-            'programs': list(programs),
-            'properties': list(properties_names)
-        })
-    except Exception as e:
-        logger.error(f"Error fetching programs and properties: {str(e)}")
-        return JsonResponse({'error': str(e)}, status=500)
-
-@require_http_methods(["GET"])
 def get_job_status(request, job_id):
     try:
         job = JobScheduler.objects.get(job_id=job_id)
