@@ -7,7 +7,7 @@ document.addEventListener('DOMContentLoaded', function() {
     const errorMessages = {
         'jobName': 'Please provide a valid job name.',
         'programId': 'Please select a valid program ID.',
-        'propertyName': 'Please select a valid property name.',
+        'propertiesName': 'Please select a valid properties name.',
         'triggerFrequency': 'Please select a trigger frequency.',
         'triggerDay': 'Please select a day of the week.',
         'triggerDate': 'Please select a day of the month.',
@@ -29,7 +29,7 @@ document.addEventListener('DOMContentLoaded', function() {
             { value: 'PROG_009', text: 'PROG_009 - HR Dashboard' },
             { value: 'PROG_010', text: 'PROG_010 - Supply Chain Analyzer' }
         ],
-        propertyName: [
+        propertiesName: [
             { value: 'SalesReportConfig', text: 'SalesReportConfig' },
             { value: 'KPIDashboardSettings', text: 'KPIDashboardSettings' },
             { value: 'FinancialReportTemplate', text: 'FinancialReportTemplate' },
@@ -105,13 +105,16 @@ document.addEventListener('DOMContentLoaded', function() {
             const dropdownList = dropdown.querySelector('.dropdown-list');
             
             if (!searchInput || !hiddenInput || !dropdownArrow || !dropdownList) {
-                console.error('Missing dropdown elements for:', fieldName);
                 return;
             }
             
-            // Populate dropdown
+            // Clear and populate dropdown
             dropdownList.innerHTML = '';
-            const data = dropdownData[fieldName] || [];
+            const data = dropdownData[fieldName];
+            
+            if (!data) {
+                return;
+            }
             
             data.forEach(item => {
                 const li = document.createElement('li');
@@ -123,6 +126,7 @@ document.addEventListener('DOMContentLoaded', function() {
             
             // Show/hide functions
             function showDropdown() {
+                // Hide other dropdowns
                 document.querySelectorAll('.searchable-dropdown.show').forEach(other => {
                     if (other !== dropdown) {
                         other.classList.remove('show');
@@ -135,7 +139,7 @@ document.addEventListener('DOMContentLoaded', function() {
                 dropdown.classList.remove('show');
             }
             
-            // Arrow click
+            // Arrow click event
             dropdownArrow.addEventListener('click', function(e) {
                 e.preventDefault();
                 e.stopPropagation();
@@ -148,7 +152,7 @@ document.addEventListener('DOMContentLoaded', function() {
                 }
             });
             
-            // Input focus/click
+            // Input focus events
             searchInput.addEventListener('focus', showDropdown);
             searchInput.addEventListener('click', showDropdown);
             
@@ -156,8 +160,6 @@ document.addEventListener('DOMContentLoaded', function() {
             searchInput.addEventListener('input', function() {
                 const filter = this.value.toLowerCase().trim();
                 const items = Array.from(dropdownList.children);
-                
-                console.log('Searching for:', filter);
                 
                 items.forEach(item => {
                     const text = item.textContent.toLowerCase();
@@ -283,7 +285,10 @@ document.addEventListener('DOMContentLoaded', function() {
     }
     
     // Add event listener to trigger frequency
-    document.getElementById('triggerFrequency').addEventListener('change', handleFrequencyChange);
+    const triggerFrequency = document.getElementById('triggerFrequency');
+    if (triggerFrequency) {
+        triggerFrequency.addEventListener('change', handleFrequencyChange);
+    }
     
     // Validation function
     function validateField(field) {
@@ -362,7 +367,8 @@ document.addEventListener('DOMContentLoaded', function() {
     }
     
     // Add validation to required fields
-    form.querySelectorAll('[required], #triggerDay, #triggerDate').forEach(field => {
+    const requiredFields = form.querySelectorAll('[required], #triggerDay, #triggerDate');
+    requiredFields.forEach(field => {
         let hasBeenBlurred = false;
         
         if (field.type === 'hidden') {
@@ -427,50 +433,56 @@ document.addEventListener('DOMContentLoaded', function() {
     });
     
     // Form submission
-    form.addEventListener('submit', function(e) {
-        // Get all currently required fields (including conditional ones)
-        const allFields = form.querySelectorAll('[required]');
-        const conditionalFields = [];
-        
-        // Add conditional fields if they should be required
-        const frequency = document.getElementById('triggerFrequency').value;
-        if (frequency === 'Weekly') {
-            conditionalFields.push(document.getElementById('triggerDay'));
-        } else if (frequency === 'Monthly') {
-            conditionalFields.push(document.getElementById('triggerDate'));
-        }
-        
-        // Combine all fields that need validation
-        const fieldsToValidate = [...allFields, ...conditionalFields];
-        let isFormValid = true;
-        
-        fieldsToValidate.forEach(field => {
-            if (!validateField(field)) {
-                isFormValid = false;
-            }
-        });
-        
-        if (!isFormValid) {
-            e.preventDefault();
+    if (form) {
+        form.addEventListener('submit', function(e) {
+            // Get all currently required fields (including conditional ones)
+            const allFields = form.querySelectorAll('[required]');
+            const conditionalFields = [];
             
-            const firstInvalidField = form.querySelector('.is-invalid');
-            if (firstInvalidField) {
-                firstInvalidField.scrollIntoView({ behavior: 'smooth', block: 'center' });
-                firstInvalidField.focus();
+            // Add conditional fields if they should be required
+            const frequency = document.getElementById('triggerFrequency').value;
+            if (frequency === 'Weekly') {
+                conditionalFields.push(document.getElementById('triggerDay'));
+            } else if (frequency === 'Monthly') {
+                conditionalFields.push(document.getElementById('triggerDate'));
             }
-            return false;
-        }
-        
-        createBtn.disabled = true;
-        createBtn.innerHTML = '<span class="spinner-border spinner-border-sm me-2" role="status"></span>Creating...';
-        
-        return true;
-    });
+            
+            // Combine all fields that need validation
+            const fieldsToValidate = [...allFields, ...conditionalFields];
+            let isFormValid = true;
+            
+            fieldsToValidate.forEach(field => {
+                if (!validateField(field)) {
+                    isFormValid = false;
+                }
+            });
+            
+            if (!isFormValid) {
+                e.preventDefault();
+                
+                const firstInvalidField = form.querySelector('.is-invalid');
+                if (firstInvalidField) {
+                    firstInvalidField.scrollIntoView({ behavior: 'smooth', block: 'center' });
+                    firstInvalidField.focus();
+                }
+                return false;
+            }
+            
+            if (createBtn) {
+                createBtn.disabled = true;
+                createBtn.innerHTML = '<span class="spinner-border spinner-border-sm me-2" role="status"></span>Creating...';
+            }
+            
+            return true;
+        });
+    }
     
     // Cancel button
-    cancelBtn.addEventListener('click', function() {
-        if (confirm('Are you sure you want to cancel? All unsaved changes will be lost.')) {
-            window.location.href = document.querySelector('a[href*="job_scheduler"]').href || '/job-scheduler/';
-        }
-    });
+    if (cancelBtn) {
+        cancelBtn.addEventListener('click', function() {
+            if (confirm('Are you sure you want to cancel? All unsaved changes will be lost.')) {
+                window.location.href = document.querySelector('a[href*="job_scheduler"]')?.href || '/job-scheduler/';
+            }
+        });
+    }
 });
