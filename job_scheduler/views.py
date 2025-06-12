@@ -97,7 +97,6 @@ def create_job_view(request):
                 job_name=job_name,
                 program=program,
                 cron_expression=cron_expression,
-                trigger_frequency=trigger_frequency,  # Add frequency field
                 enabled=True
             )
             

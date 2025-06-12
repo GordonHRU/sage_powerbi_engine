@@ -47,7 +47,6 @@
                                     <tr>
                                         <th>Job Name</th>
                                         <th>Program ID</th>
-                                        <!-- <th>Frequency</th> -->
                                         <th>Last Run</th>
                                         <th>Next Run</th>
                                         <th>Actions</th>
@@ -58,16 +57,6 @@
                                     <tr>
                                         <td>{{ job.job_name }}</td>
                                         <td>{{ job.program.program_id }}</td>
-                                        <!-- <td>
-                                            <span class="badge 
-                                                {% if job.trigger_frequency == 'Daily' %}bg-primary
-                                                {% elif job.trigger_frequency == 'Weekly' %}bg-success
-                                                {% elif job.trigger_frequency == 'Monthly' %}bg-info
-                                                {% else %}bg-secondary
-                                                {% endif %}">
-                                                {{ job.trigger_frequency }}
-                                            </span>
-                                        </td> -->
                                         <td>
                                             {% if job.last_run_time %}
                                                 {{ job.last_run_time|date:"Y-m-d H:i" }}
