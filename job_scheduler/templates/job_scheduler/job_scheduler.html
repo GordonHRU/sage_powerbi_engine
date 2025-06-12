@@ -40,89 +40,104 @@
                     <h6 class="mb-0">Scheduled Jobs</h6>
                 </div>
                 <div class="card-body">
-                    <div class="table-responsive">
-                        <table class="table table-hover">
-                            <thead>
-                                <tr>
-                                    <th>Job Name</th>
-                                    <th>Program ID</th>
-                                    <th>Property Name</th>
-                                    <th>Trigger Frequency</th>
-                                    <th>Trigger Time</th>
-                                    <th>Actions</th>
-                                </tr>
-                            </thead>
-                            <tbody>
-                                <tr>
-                                    <td>Daily Sales Report</td>
-                                    <td>PROG_001</td>
-                                    <td>SalesReportConfig</td>
-                                    <td>Daily</td>
-                                    <td>09:00</td>
-                                    <td>
-                                        <button class="btn btn-sm btn-outline-primary">Edit</button>
-                                        <button class="btn btn-sm btn-outline-danger">Delete</button>
-                                    </td>
-                                </tr>
-                                <tr>
-                                    <td>Weekly KPI Dashboard</td>
-                                    <td>PROG_002</td>
-                                    <td>KPIDashboardSettings</td>
-                                    <td>Weekly</td>
-                                    <td>10:30</td>
-                                    <td>
-                                        <button class="btn btn-sm btn-outline-primary">Edit</button>
-                                        <button class="btn btn-sm btn-outline-danger">Delete</button>
-                                    </td>
-                                </tr>
-                                <tr>
-                                    <td>Monthly Financial Report</td>
-                                    <td>PROG_003</td>
-                                    <td>FinancialReportTemplate</td>
-                                    <td>Monthly</td>
-                                    <td>08:00</td>
-                                    <td>
-                                        <button class="btn btn-sm btn-outline-primary">Edit</button>
-                                        <button class="btn btn-sm btn-outline-danger">Delete</button>
-                                    </td>
-                                </tr>
-                                <tr>
-                                    <td>Quarterly Business Review</td>
-                                    <td>PROG_004</td>
-                                    <td>QuarterlyAnalysisConfig</td>
-                                    <td>Monthly</td>
-                                    <td>16:30</td>
-                                    <td>
-                                        <button class="btn btn-sm btn-outline-primary">Edit</button>
-                                        <button class="btn btn-sm btn-outline-danger">Delete</button>
-                                    </td>
-                                </tr>
-                                <tr>
-                                    <td>Customer Analytics Update</td>
-                                    <td>PROG_005</td>
-                                    <td>CustomerDataProcessing</td>
-                                    <td>Daily</td>
-                                    <td>14:15</td>
-                                    <td>
-                                        <button class="btn btn-sm btn-outline-primary">Edit</button>
-                                        <button class="btn btn-sm btn-outline-danger">Delete</button>
-                                    </td>
-                                </tr>
-                                <tr>
-                                    <td>Inventory Status Report</td>
-                                    <td>PROG_006</td>
-                                    <td>InventoryTrackingSettings</td>
-                                    <td>Weekly</td>
-                                    <td>06:45</td>
-                                    <td>
-                                        <button class="btn btn-sm btn-outline-primary">Edit</button>
-                                        <button class="btn btn-sm btn-outline-danger">Delete</button>
-                                    </td>
-                                </tr>
-                            </tbody>
-                        </table>
-                    </div>
+                    {% if jobs %}
+                        <div class="table-responsive">
+                            <table class="table table-hover">
+                                <thead>
+                                    <tr>
+                                        <th>Job Name</th>
+                                        <th>Program ID</th>
+                                        <th>Frequency</th>
+                                        <th>Last Run</th>
+                                        <th>Next Run</th>
+                                        <th>Actions</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    {% for job in jobs %}
+                                    <tr>
+                                        <td>{{ job.job_name }}</td>
+                                        <td>{{ job.program.program_id }}</td>
+                                        <td>
+                                            <span class="badge 
+                                                {% if job.trigger_frequency == 'Daily' %}bg-primary
+                                                {% elif job.trigger_frequency == 'Weekly' %}bg-success
+                                                {% elif job.trigger_frequency == 'Monthly' %}bg-info
+                                                {% else %}bg-secondary
+                                                {% endif %}">
+                                                {{ job.trigger_frequency }}
+                                            </span>
+                                        </td>
+                                        <td>
+                                            {% if job.last_run_time %}
+                                                {{ job.last_run_time|date:"Y-m-d H:i" }}
+                                            {% else %}
+                                                <span class="text-muted">Never</span>
+                                            {% endif %}
+                                        </td>
+                                        <td>
+                                            {% if job.next_run_time %}
+                                                {{ job.next_run_time|date:"Y-m-d H:i" }}
+                                            {% else %}
+                                                <span class="text-muted">Not scheduled</span>
+                                            {% endif %}
+                                        </td>
+                                        <td>
+                                            <button class="btn btn-sm btn-outline-primary" 
+                                                    data-job-id="{{ job.job_id }}"
+                                                    onclick="editJob(this.dataset.jobId)">
+                                                Edit
+                                            </button>
+                                            <button class="btn btn-sm btn-outline-danger" 
+                                                    data-job-id="{{ job.job_id }}"
+                                                    data-job-name="{{ job.job_name|escapejs }}"
+                                                    onclick="deleteJob(this.dataset.jobId, this.dataset.jobName)">
+                                                Delete
+                                            </button>
+                                            <button class="btn btn-sm btn-outline-info" 
+                                                    data-job-id="{{ job.job_id }}"
+                                                    onclick="viewHistory(this.dataset.jobId)">
+                                                History
+                                            </button>
+                                        </td>
+                                    </tr>
+                                    {% endfor %}
+                                </tbody>
+                            </table>
+                        </div>
+                    {% else %}
+                        <div class="text-center py-5">
+                            <div class="mb-3">
+                                <i class="bi bi-calendar-x" style="font-size: 3rem; color: #6c757d;"></i>
+                            </div>
+                            <h5 class="text-muted mb-3">No Scheduled Jobs</h5>
+                            <p class="text-muted mb-4">You haven't created any scheduled jobs yet.</p>
+                            <button class="btn btn-success create-btn">
+                                <i class="bi bi-plus-circle me-2"></i>Create Your First Job
+                            </button>
+                        </div>
+                    {% endif %}
                 </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Delete Confirmation Modal -->
+<div class="modal fade" id="deleteJobModal" tabindex="-1" aria-labelledby="deleteJobModalLabel" aria-hidden="true">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title" id="deleteJobModalLabel">Confirm Delete</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <div class="modal-body">
+                <p>Are you sure you want to delete the job "<span id="jobNameToDelete"></span>"?</p>
+                <p class="text-danger small">This action cannot be undone.</p>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
+                <button type="button" class="btn btn-danger" id="confirmDeleteBtn">Delete</button>
             </div>
         </div>
     </div>
@@ -155,5 +170,28 @@
             });
         }
     });
+    
+    // Job action functions
+    function editJob(jobId) {
+        // TODO: Implement edit functionality
+        alert('Edit functionality will be implemented');
+    }
+    
+    function deleteJob(jobId, jobName) {
+        document.getElementById('jobNameToDelete').textContent = jobName;
+        const modal = new bootstrap.Modal(document.getElementById('deleteJobModal'));
+        modal.show();
+        
+        document.getElementById('confirmDeleteBtn').onclick = function() {
+            // TODO: Implement delete functionality
+            alert('Delete functionality will be implemented');
+            modal.hide();
+        };
+    }
+    
+    function viewHistory(jobId) {
+        // TODO: Implement history view
+        alert('History functionality will be implemented');
+    }
 </script>
 {% endblock %}

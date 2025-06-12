@@ -1,17 +1,161 @@
-from django.shortcuts import render
+from django.shortcuts import render, redirect
 from django.http import JsonResponse
 from django.views.decorators.http import require_http_methods
+from django.contrib import messages
+from django.views.decorators.csrf import csrf_exempt
+from django.utils.decorators import method_decorator
 from .models import JobScheduler, JobExecution
+from program.models import Program
 from django.utils import timezone
 import json
+import logging
 
-# Create your views here.
+logger = logging.getLogger(__name__)
+
 def job_scheduler_view(request):
-    
-    return render(request, 'job_scheduler/job_scheduler.html')
+    """Display all scheduled jobs from the database"""
+    jobs = JobScheduler.objects.select_related('program').all()
+    context = {
+        'jobs': jobs
+    }
+    return render(request, 'job_scheduler/job_scheduler.html', context)
 
 def create_job_view(request):
+    if request.method == 'POST':
+        try:
+            # Extract form data
+            job_name = request.POST.get('jobName', '').strip()
+            program_id = request.POST.get('programId', '').strip()
+            property_name = request.POST.get('propertyName', '').strip()
+            trigger_frequency = request.POST.get('triggerFrequency', '').strip()
+            trigger_day = request.POST.get('triggerDay', '').strip()
+            trigger_date = request.POST.get('triggerDate', '').strip()
+            trigger_hour = request.POST.get('triggerHour', '').strip()
+            trigger_minute = request.POST.get('triggerMinute', '').strip()
+            
+            # Validation
+            errors = []
+            if not job_name:
+                errors.append('Job Name is required')
+            if not program_id:
+                errors.append('Program ID is required')
+            if not property_name:
+                errors.append('Property Name is required')
+            if not trigger_frequency:
+                errors.append('Trigger Frequency is required')
+            if not trigger_hour or not trigger_minute:
+                errors.append('Trigger Time is required')
+                
+            # Validate hour and minute
+            try:
+                hour = int(trigger_hour)
+                minute = int(trigger_minute)
+                if not (0 <= hour <= 23):
+                    errors.append('Hour must be between 0 and 23')
+                if not (0 <= minute <= 59):
+                    errors.append('Minute must be between 0 and 59')
+            except (ValueError, TypeError):
+                errors.append('Invalid time format')
+            
+            # Validate conditional fields
+            if trigger_frequency == 'Weekly' and not trigger_day:
+                errors.append('Trigger Day is required for weekly frequency')
+            if trigger_frequency == 'Monthly' and not trigger_date:
+                errors.append('Trigger Date is required for monthly frequency')
+            
+            # Check if program exists
+            try:
+                program = Program.objects.get(program_id=program_id)
+            except Program.DoesNotExist:
+                errors.append('Selected program does not exist')
+                program = None
+            
+            # Check if job name already exists
+            if JobScheduler.objects.filter(job_name=job_name).exists():
+                errors.append('A job with this name already exists')
+            
+            if errors:
+                for error in errors:
+                    messages.error(request, error)
+                return render(request, 'job_scheduler/create_job.html', {
+                    'form_data': request.POST
+                })
+            
+            # Generate cron expression
+            cron_expression = generate_cron_expression(
+                trigger_frequency, trigger_day, trigger_date, hour, minute
+            )
+            
+            if not cron_expression:
+                messages.error(request, 'Failed to generate schedule expression')
+                return render(request, 'job_scheduler/create_job.html', {
+                    'form_data': request.POST
+                })
+            
+            # Create the job
+            job = JobScheduler.objects.create(
+                job_name=job_name,
+                program=program,
+                cron_expression=cron_expression,
+                trigger_frequency=trigger_frequency,  # Add frequency field
+                enabled=True
+            )
+            
+            logger.info(f"Created new job: {job_name} with cron: {cron_expression}")
+            messages.success(request, f'Job "{job_name}" created successfully!')
+            return redirect('job_scheduler')
+            
+        except Exception as e:
+            logger.error(f"Error creating job: {str(e)}")
+            messages.error(request, f'An error occurred while creating the job: {str(e)}')
+            return render(request, 'job_scheduler/create_job.html', {
+                'form_data': request.POST
+            })
+    
+    # GET request - show the form
     return render(request, 'job_scheduler/create_job.html')
+
+def generate_cron_expression(frequency, day, date, hour, minute):
+    """Generate cron expression based on frequency and time parameters"""
+    try:
+        if frequency == 'Daily':
+            return f"{minute} {hour} * * *"
+        elif frequency == 'Weekly':
+            # Convert day name to number (Monday=1, Sunday=0)
+            day_mapping = {
+                'Monday': '1', 'Tuesday': '2', 'Wednesday': '3', 'Thursday': '4',
+                'Friday': '5', 'Saturday': '6', 'Sunday': '0'
+            }
+            day_num = day_mapping.get(day)
+            if day_num is None:
+                return None
+            return f"{minute} {hour} * * {day_num}"
+        elif frequency == 'Monthly':
+            return f"{minute} {hour} {date} * *"
+        else:
+            return None
+    except Exception as e:
+        logger.error(f"Error generating cron expression: {str(e)}")
+        return None
+
+@require_http_methods(["GET"])
+def get_programs_and_properties(request):
+    """API endpoint to get programs and properties for dropdowns"""
+    try:
+        programs = Program.objects.all().values('program_id', 'program_name')
+        
+        # Get unique property names from programs
+        # This assumes your Program model has a property_name field
+        # Adjust based on your actual Program model structure
+        property_names = Program.objects.values_list('property_name', flat=True).distinct()
+        
+        return JsonResponse({
+            'programs': list(programs),
+            'properties': list(property_names)
+        })
+    except Exception as e:
+        logger.error(f"Error fetching programs and properties: {str(e)}")
+        return JsonResponse({'error': str(e)}, status=500)
 
 @require_http_methods(["GET"])
 def get_job_status(request, job_id):
@@ -36,12 +180,12 @@ def get_job_status(request, job_id):
                 'job_id': job.job_id,
                 'job_name': job.job_name,
                 'status': 'never_run',
-                'message': '任務尚未執行'
+                'message': 'Job has not been executed yet'
             }
             
         return JsonResponse(response_data)
     except JobScheduler.DoesNotExist:
-        return JsonResponse({'error': '找不到指定的任務'}, status=404)
+        return JsonResponse({'error': 'Job not found'}, status=404)
     except Exception as e:
         return JsonResponse({'error': str(e)}, status=500)
 
@@ -49,7 +193,7 @@ def get_job_status(request, job_id):
 def get_execution_history(request, job_id):
     try:
         job = JobScheduler.objects.get(job_id=job_id)
-        executions = job.executions.order_by('-start_time')[:10]  # 只返回最近10次執行
+        executions = job.executions.order_by('-start_time')[:10]  # Return latest 10 executions
         
         history = []
         for execution in executions:
@@ -65,6 +209,6 @@ def get_execution_history(request, job_id):
             
         return JsonResponse({'history': history})
     except JobScheduler.DoesNotExist:
-        return JsonResponse({'error': '找不到指定的任務'}, status=404)
+        return JsonResponse({'error': 'Job not found'}, status=404)
     except Exception as e:
         return JsonResponse({'error': str(e)}, status=500)
