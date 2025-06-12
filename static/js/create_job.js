@@ -18,16 +18,16 @@ document.addEventListener('DOMContentLoaded', function() {
     // Data for dropdowns
     const dropdownData = {
         programId: [
-            { value: 'PROG_001', text: 'PROG_001 - Sales Report Generator' },
-            { value: 'PROG_002', text: 'PROG_002 - KPI Dashboard Builder' },
-            { value: 'PROG_003', text: 'PROG_003 - Financial Report Engine' },
-            { value: 'PROG_004', text: 'PROG_004 - Business Analytics Tool' },
-            { value: 'PROG_005', text: 'PROG_005 - Customer Data Processor' },
-            { value: 'PROG_006', text: 'PROG_006 - Inventory Tracker' },
-            { value: 'PROG_007', text: 'PROG_007 - Performance Monitor' },
-            { value: 'PROG_008', text: 'PROG_008 - Marketing Analytics' },
-            { value: 'PROG_009', text: 'PROG_009 - HR Dashboard' },
-            { value: 'PROG_010', text: 'PROG_010 - Supply Chain Analyzer' }
+            { value: '1', text: 'PROG_001 - Sales Report Generator' },
+            { value: '2', text: 'PROG_002 - KPI Dashboard Builder' },
+            { value: '3', text: 'PROG_003 - Financial Report Engine' },
+            { value: '4', text: 'PROG_004 - Business Analytics Tool' },
+            { value: '5', text: 'PROG_005 - Customer Data Processor' },
+            { value: '6', text: 'PROG_006 - Inventory Tracker' },
+            { value: '7', text: 'PROG_007 - Performance Monitor' },
+            { value: '8', text: 'PROG_008 - Marketing Analytics' },
+            { value: '9', text: 'PROG_009 - HR Dashboard' },
+            { value: '10', text: 'PROG_010 - Supply Chain Analyzer' }
         ],
         propertiesName: [
             { value: 'SalesReportConfig', text: 'SalesReportConfig' },
