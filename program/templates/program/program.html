@@ -1,0 +1,176 @@
+{% extends "base_with_sidebar.html" %}
+{% load static %}
+
+{% block title %}Program - Power BI Automation Engine{% endblock %}
+
+{% block breadcrumb %}
+<li class="breadcrumb-item">
+    <a href="{% url 'index' %}">Home</a>
+</li>
+<li class="breadcrumb-item active">Program</li>
+{% endblock %}
+
+{% block page_title %}Program{% endblock %}
+
+{% block action_buttons %}
+<!-- Action Buttons -->
+<div class="action-buttons">
+    <button class="btn btn-lg btn-outline-success create-btn">
+        Create
+    </button>
+</div>
+{% endblock %}
+
+{% block search_section %}
+<!-- Search Section -->
+<div class="search-section">
+    <div class="search-container">
+        <img src="{% static 'image/NaviBarIcon/Search.png' %}" alt="Search" class="search-icon">
+        <input type="text" class="search-input" placeholder="Search Program">
+    </div>
+</div>
+{% endblock %}
+
+{% block content %}
+<div class="container-fluid">
+    <div class="row">
+        <div class="col-12">
+            <div class="card">
+                <div class="card-header">
+                    <h6 class="mb-0">Programs</h6>
+                </div>
+                <div class="card-body">
+                    {% if programs %}
+                        <div class="table-responsive">
+                            <table class="table table-hover">
+                                <thead>
+                                    <tr>
+                                        <th>Program Name</th>
+                                        <th>Program ID</th>
+                                        <th>Last Run</th>
+                                        <th>Next Run</th>
+                                        <th>Actions</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    {% for program in programs %}
+                                    <tr>
+                                        <td>{{ program.program_name }}</td>
+                                        <td>{{ program.program_id }}</td>
+                                        <td>
+                                            {% if program.last_run_time %}
+                                                {{ program.last_run_time|date:"Y-m-d H:i" }}
+                                            {% else %}
+                                                <span class="text-muted">Never</span>
+                                            {% endif %}
+                                        </td>
+                                        <td>
+                                            {% if program.next_run_time %}
+                                                {{ program.next_run_time|date:"Y-m-d H:i" }}
+                                            {% else %}
+                                                <span class="text-muted">Not scheduled</span>
+                                            {% endif %}
+                                        </td>
+                                        <td>
+                                            <button class="btn btn-sm btn-outline-primary" 
+                                                    data-program-id="{{ program.program_id }}"
+                                                    onclick="editProgram(this.dataset.programId)">
+                                                Edit
+                                            </button>
+                                            <button class="btn btn-sm btn-outline-danger" 
+                                                    data-program-id="{{ program.program_id }}"
+                                                    data-program-name="{{ program.program_name|escapejs }}"
+                                                    onclick="deleteProgram(this.dataset.programId, this.dataset.programName)">
+                                                Delete
+                                            </button>
+                                        </td>
+                                    </tr>
+                                    {% endfor %}
+                                </tbody>
+                            </table>
+                        </div>
+                    {% else %}
+                        <div class="text-center py-5">
+                            <div class="mb-3">
+                                <i class="bi bi-calendar-x" style="font-size: 3rem; color: #6c757d;"></i>
+                            </div>
+                            <h5 class="text-muted mb-3">No Programs</h5>
+                            <p class="text-muted mb-4">You haven't created any programs yet.</p>
+                            <button class="btn btn-success create-btn">
+                                <i class="bi bi-plus-circle me-2"></i>Create Your First Program
+                            </button>
+                        </div>
+                    {% endif %}
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Delete Confirmation Modal -->
+<div class="modal fade" id="deleteProgramModal" tabindex="-1" aria-labelledby="deleteProgramModalLabel" aria-hidden="true">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title" id="deleteProgramModalLabel">Confirm Delete</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <div class="modal-body">
+                <p>Are you sure you want to delete the program "<span id="programNameToDelete"></span>"?</p>
+                <p class="text-danger small">This action cannot be undone.</p>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
+                <button type="button" class="btn btn-danger" id="confirmDeleteBtn">Delete</button>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block extra_js %}
+<script>
+    document.addEventListener('DOMContentLoaded', function() {
+        console.log('Program page loaded');
+        
+        // Add functionality for create button
+        document.querySelectorAll('.create-btn').forEach(btn => {
+            btn.addEventListener('click', function() {
+                window.location.href = "{% url 'create_program' %}";
+            });
+        });
+        
+        // Add search functionality
+        const searchInput = document.querySelector('.search-input');
+        if (searchInput) {
+            searchInput.addEventListener('input', function() {
+                const searchTerm = this.value.toLowerCase();
+                const tableRows = document.querySelectorAll('tbody tr');
+                
+                tableRows.forEach(row => {
+                    const text = row.textContent.toLowerCase();
+                    row.style.display = text.includes(searchTerm) ? '' : 'none';
+                });
+            });
+        }
+    });
+    
+    // Program action functions
+    function editProgram(programId) {
+        // TODO: Implement edit functionality
+        alert('Edit functionality will be implemented');
+    }
+    
+    function deleteProgram(programId, programName) {
+        document.getElementById('programNameToDelete').textContent = programName;
+        const modal = new bootstrap.Modal(document.getElementById('deleteProgramModal'));
+        modal.show();
+        
+        document.getElementById('confirmDeleteBtn').onclick = function() {
+            // TODO: Implement delete functionality
+            alert('Delete functionality will be implemented');
+            modal.hide();
+        };
+    }
+</script>
+{% endblock %}
