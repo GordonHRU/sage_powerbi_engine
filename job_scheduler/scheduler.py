@@ -10,6 +10,8 @@ import os
 import json
 from apscheduler.events import EVENT_JOB_ERROR
 from static.utils.db_utils import retry_on_db_lock
+import time
+from django.db.utils import OperationalError
 
 logger = logging.getLogger(__name__)
 
@@ -69,51 +71,68 @@ def execute_powerbi_engine(program):
         except subprocess.TimeoutExpired:
             process.kill()
             stdout, stderr = process.communicate()
-            return None, "執行超時（超過1小時）"
+            return None, "執行超時 超過1小時 "
             
     except Exception as e:
         logger.error(f"執行 Power BI Engine 時發生錯誤: {str(e)}")
         return None, str(e)
 
-@retry_on_db_lock
 def execute_job(job_id):
     """執行排程任務"""
-    try:
-        # 從資料庫獲取任務資訊
-        job = JobScheduler.objects.get(job_id=job_id)
-        program = Program.objects.get(program_id=job.program_id)
-        
-        # 創建執行記錄
-        execution = JobExecution.objects.create(
-            job_id=job,
-            status='running',
-            start_time=timezone.now()
-        )
-        
+    max_retries = 3
+    retry_delay = 1
+    
+    for attempt in range(max_retries):
         try:
-            # 執行 PowerBI 引擎
-            output, error = execute_powerbi_engine(program)
+            # 從資料庫獲取任務資訊
+            job = JobScheduler.objects.get(job_id=job_id)
+            program = job.program
             
-            # 更新執行記錄
-            execution.status = 'completed' if not error else 'failed'
-            execution.end_time = timezone.now()
-            execution.output = output
-            execution.error = error
-            execution.save()
+            # 創建執行記錄
+            execution = JobExecution.objects.create(
+                job=job,
+                status='running',
+                start_time=timezone.now()
+            )
             
-            logger.info(f"任務 {job.job_name} 執行成功")
-            
+            try:
+                # 執行 PowerBI 引擎
+                output, error = execute_powerbi_engine(program)
+                
+                # 更新執行記錄
+                execution.status = 'completed' if not error else 'failed'
+                execution.end_time = timezone.now()
+                execution.output = output
+                execution.error = error
+                execution.save()
+                
+                logger.info(f"任務 {job.job_name} 執行成功")
+                break  # 成功執行，跳出重試循環
+                
+            except Exception as e:
+                # 更新執行記錄為失敗
+                execution.status = 'failed'
+                execution.end_time = timezone.now()
+                execution.error = str(e)
+                execution.save()
+                
+                logger.error(f"任務 {job.job_name} 執行失敗: {str(e)}")
+                break  # 執行失敗，跳出重試循環
+                
+        except OperationalError as e:
+            if "database is locked" in str(e).lower():
+                if attempt < max_retries - 1:
+                    wait_time = retry_delay * (2 ** attempt)
+                    logger.warning(f"資料庫鎖定，{wait_time} 秒後重試... (嘗試 {attempt + 1}/{max_retries})")
+                    time.sleep(wait_time)
+                else:
+                    logger.error(f"資料庫鎖定，已重試 {max_retries} 次")
+                    raise
+            else:
+                raise
         except Exception as e:
-            # 更新執行記錄為失敗
-            execution.status = 'failed'
-            execution.end_time = timezone.now()
-            execution.error = str(e)
-            execution.save()
-            
-            logger.error(f"任務 {job.job_name} 執行失敗: {str(e)}")
-            
-    except Exception as e:
-        logger.error(f"執行任務 {job_id} 時發生錯誤: {str(e)}")
+            logger.error(f"執行任務 {job_id} 時發生錯誤: {str(e)}")
+            break  # 其他錯誤，跳出重試循環
 
 @retry_on_db_lock
 def init_scheduler():
