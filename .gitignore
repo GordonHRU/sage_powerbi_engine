@@ -15,11 +15,11 @@ ENV/
 *.swo
 
 # 資料庫
-# *.db
-# *.sqlite3
-# *.sqlite3-journal
-# db.sqlite3
-# db.sqlite3-journal
+*.db
+*.sqlite3
+*.sqlite3-journal
+db.sqlite3
+db.sqlite3-journal
 
 # 日誌檔案
 *.log
