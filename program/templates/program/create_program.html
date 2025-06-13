@@ -1,0 +1,73 @@
+{% extends "base_with_sidebar.html" %}
+{% load static %}
+
+{% block title %}New Program - Power BI Automation Engine{% endblock %}
+
+{% block breadcrumb %}
+<li class="breadcrumb-item">
+    <a href="{% url 'index' %}">Home</a>
+</li>
+<li class="breadcrumb-item">
+    <a href="{% url 'program' %}">Program</a>
+</li>
+<li class="breadcrumb-item active">New Program</li>
+{% endblock %}
+
+{% block page_title %}New Program{% endblock %}
+
+{% block content %}
+<div class="container-fluid">
+    <div class="row justify-content-center">
+        <div class="col-lg-8 col-md-10">
+            <div class="card">
+                <div class="card-header">
+                    <h5 class="mb-0">
+                        New Program Details
+                    </h5>
+                </div>
+                <div class="card-body">
+                    <form id="createProgramForm" method="post" novalidate>
+                        {% csrf_token %}
+                        <!-- Program Name Field -->
+                        <div class="mb-4">
+                            <label for="programName" class="form-label required-field">
+                                Program Name <span class="text-danger">*</span>
+                            </label>
+                            <input type="text" 
+                                   class="form-control" 
+                                   id="programName" 
+                                   name="programName" 
+                                   placeholder="Enter Program Name"
+                                   required>
+                        </div>
+
+                        <!-- Form Buttons -->
+                        <div class="form-actions mt-5">
+                            <div class="d-flex justify-content-end gap-3">
+                                <button type="button" 
+                                        class="btn btn-lg btn-outline-secondary" 
+                                        id="cancelBtn">
+                                    Cancel
+                                </button>
+                                <button type="submit" 
+                                        class="btn btn-lg btn-success" 
+                                        id="createBtn">
+                                    Create
+                                </button>
+                            </div>
+                        </div>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block extra_css %}
+<link rel="stylesheet" href="{% static 'css/create_program.css' %}">
+{% endblock %}
+
+{% block extra_js %}
+<script src="{% static 'js/create_program.js' %}"></script>
+{% endblock %}
