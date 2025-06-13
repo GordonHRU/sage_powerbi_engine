@@ -45,6 +45,33 @@ document.addEventListener('DOMContentLoaded', function() {
         ]
     };
     
+    // Helper function to generate cron expression
+    function generateCronExpression(frequency, day, date, hour, minute) {
+        try {
+            if (frequency === 'Daily') {
+                return `${minute} ${hour} * * *`;
+            } else if (frequency === 'Weekly') {
+                // Convert day name to number (Monday=1, Sunday=0)
+                const dayMapping = {
+                    'Monday': '1', 'Tuesday': '2', 'Wednesday': '3', 'Thursday': '4',
+                    'Friday': '5', 'Saturday': '6', 'Sunday': '0'
+                };
+                const dayNum = dayMapping[day];
+                if (!dayNum && dayNum !== '0') {
+                    return null;
+                }
+                return `${minute} ${hour} * * ${dayNum}`;
+            } else if (frequency === 'Monthly') {
+                return `${minute} ${hour} ${date} * *`;
+            } else {
+                return null;
+            }
+        } catch (error) {
+            console.error('Error generating cron expression:', error);
+            return null;
+        }
+    }
+    
     // Function to create error message element
     function createErrorMessage(fieldId, message) {
         const errorDiv = document.createElement('div');
@@ -432,9 +459,13 @@ document.addEventListener('DOMContentLoaded', function() {
         }
     });
     
-    // Form submission
+    // UPDATED FORM SUBMISSION - JSON VERSION
     if (form) {
         form.addEventListener('submit', function(e) {
+            e.preventDefault(); // Always prevent default form submission
+            
+            console.log('Form submission started'); // Debug log
+            
             // Get all currently required fields (including conditional ones)
             const allFields = form.querySelectorAll('[required]');
             const conditionalFields = [];
@@ -458,8 +489,6 @@ document.addEventListener('DOMContentLoaded', function() {
             });
             
             if (!isFormValid) {
-                e.preventDefault();
-                
                 const firstInvalidField = form.querySelector('.is-invalid');
                 if (firstInvalidField) {
                     firstInvalidField.scrollIntoView({ behavior: 'smooth', block: 'center' });
@@ -473,7 +502,100 @@ document.addEventListener('DOMContentLoaded', function() {
                 createBtn.innerHTML = '<span class="spinner-border spinner-border-sm me-2" role="status"></span>Creating...';
             }
             
-            return true;
+            // Collect form data
+            const jobName = document.getElementById('jobName').value.trim();
+            const programId = document.getElementById('programId').value.trim();
+            const triggerFrequency = document.getElementById('triggerFrequency').value;
+            const triggerDay = document.getElementById('triggerDay').value;
+            const triggerDate = document.getElementById('triggerDate').value;
+            const triggerHour = document.getElementById('triggerHour').value;
+            const triggerMinute = document.getElementById('triggerMinute').value;
+            
+            console.log('Form data collected:', {
+                jobName, programId, triggerFrequency, triggerDay, triggerDate, triggerHour, triggerMinute
+            });
+            
+            // Generate cron expression
+            const cronExpression = generateCronExpression(
+                triggerFrequency,
+                triggerDay,
+                triggerDate,
+                parseInt(triggerHour),
+                parseInt(triggerMinute)
+            );
+            
+            console.log('Generated cron expression:', cronExpression);
+            
+            if (!cronExpression) {
+                alert('Failed to generate schedule expression');
+                if (createBtn) {
+                    createBtn.disabled = false;
+                    createBtn.innerHTML = 'Create';
+                }
+                return false;
+            }
+            
+            // Prepare JSON payload for the existing create_job function
+            const jsonData = {
+                job_name: jobName,
+                program_id: programId,
+                cron_expression: cronExpression,
+                enabled: true
+            };
+            
+            console.log('JSON payload:', jsonData);
+            
+            // Get CSRF token
+            const csrfToken = document.querySelector('[name=csrfmiddlewaretoken]').value;
+            console.log('CSRF token:', csrfToken ? 'Found' : 'Not found');
+            
+            // Submit via JSON to the existing create_job function
+            fetch(window.location.href, {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                    'X-CSRFToken': csrfToken,
+                },
+                body: JSON.stringify(jsonData)
+            })
+            .then(response => {
+                console.log('Response status:', response.status);
+                console.log('Response headers:', response.headers);
+                
+                if (!response.ok) {
+                    return response.json().then(err => {
+                        console.error('Error response:', err);
+                        return Promise.reject(err);
+                    });
+                }
+                return response.json();
+            })
+            .then(data => {
+                console.log('Success response:', data);
+                if (data.status === 'success') {
+                    alert('Job created successfully!');
+                    window.location.href = document.querySelector('a[href*="job_scheduler"]')?.href || '/job-scheduler/';
+                } else {
+                    alert('Error: ' + (data.message || 'Failed to create job'));
+                }
+            })
+            .catch(error => {
+                console.error('Fetch error:', error);
+                if (error.message) {
+                    alert('Error: ' + error.message);
+                } else {
+                    alert('An error occurred while creating the job.');
+                }
+            })
+            .finally(() => {
+                // Re-enable the button
+                if (createBtn) {
+                    createBtn.disabled = false;
+                    createBtn.innerHTML = 'Create';
+                }
+            });
+            
+            return false;
         });
     }
     
