@@ -137,12 +137,17 @@ def frequency_convert(data, direction='forward'):
     """
     # 如果是 JobScheduler 對象，轉換為字典
 
+    dayMapping = {
+        'Monday': '1', 'Tuesday': '2', 'Wednesday': '3', 'Thursday': '4',
+        'Friday': '5', 'Saturday': '6', 'Sunday': '0'
+        }
+
     if direction == 'forward':
-        match data['trigger_frequence']:
+        match data['trigger_frequency']:
             case "Daily":
                 data['cron_expression'] = f"{data['trigger_minute']} {data['trigger_hour']} * * *"
             case "weekly":
-                data['cron_expression'] = f"{data['trigger_minute']} {data['trigger_hour']} * * {data['trigger_day']}"
+                data['cron_expression'] = f"{data['trigger_minute']} {data['trigger_hour']} * * {dayMapping[data['trigger_day']]}"
             case "monthly":
                 data['cron_expression'] = f"{data['trigger_minute']} {data['trigger_hour']} {data['trigger_date']} * *"
     else:  # reverse
@@ -150,19 +155,19 @@ def frequency_convert(data, direction='forward'):
         if len(cron_parts) >= 5:
             minute, hour, day, month, weekday = cron_parts[:5]
             if day == '*' and weekday == '*':  # Daily
-                data['trigger_frequence'] = "Daily"
-                data['trigger_minute'] = minute
-                data['trigger_hour'] = hour
+                data['trigger_frequency'] = "Daily"
+                data['trigger_minute'] = minute.zfill(2)
+                data['trigger_hour'] = hour.zfill(2)
             elif day == '*':  # Weekly
-                data['trigger_frequence'] = "weekly"
-                data['trigger_minute'] = minute
-                data['trigger_hour'] = hour
-                data['trigger_day'] = weekday
+                data['trigger_frequency'] = "Weekly"
+                data['trigger_minute'] = minute.zfill(2)
+                data['trigger_hour'] = hour.zfill(2)
+                data['trigger_day'] = list(dayMapping.keys())[list(dayMapping.values()).index(weekday)]
             else:  # Monthly
-                data['trigger_frequence'] = "monthly"
-                data['trigger_minute'] = minute
-                data['trigger_hour'] = hour
-                data['trigger_date'] = day
+                data['trigger_frequency'] = "Monthly"
+                data['trigger_minute'] = minute.zfill(2)
+                data['trigger_hour'] = hour.zfill(2)
+                data['trigger_date'] = day.zfill(2)
     return data
 
 

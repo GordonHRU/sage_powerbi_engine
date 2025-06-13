@@ -47,6 +47,10 @@
                                     <tr>
                                         <th>Job Name</th>
                                         <th>Program ID</th>
+                                        <th>Trigger Frequency</th>
+                                        <th>Trigger Date</th>
+                                        <th>Trigger Day</th>
+                                        <th>Trigger Time</th>
                                         <th>Last Run</th>
                                         <th>Next Run</th>
                                         <th>Actions</th>
@@ -56,7 +60,27 @@
                                     {% for job in jobs %}
                                     <tr>
                                         <td>{{ job.job_name }}</td>
-                                        <td>{{ job.program.program_id }}</td>
+                                        <td>{{ job.program_id }}</td>
+                                        <td>{{ job.trigger_frequency }}</td>
+                                        <td>
+                                            {% if job.trigger_date %}
+                                                {{ job.trigger_date }}
+                                            {% elif job.trigger_day %}
+                                                <span class="text-muted">N/A</span>
+                                            {% else %}
+                                                <span class="text-muted">All</span>
+                                            {% endif %}
+                                        </td>
+                                        <td>
+                                            {% if job.trigger_day %}
+                                                {{ job.trigger_day }}
+                                            {% elif job.trigger_date %}
+                                                <span class="text-muted">N/A</span>
+                                            {% else %}
+                                                <span class="text-muted">All</span>
+                                            {% endif %}
+                                        </td>
+                                        <td>{{ job.trigger_hour }}:{{ job.trigger_minute }}</td>
                                         <td>
                                             {% if job.last_run_time %}
                                                 {{ job.last_run_time|date:"Y-m-d H:i" }}
