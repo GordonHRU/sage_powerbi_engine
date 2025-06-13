@@ -8,8 +8,8 @@ import logging
 import subprocess
 import os
 import json
-from datetime import datetime
-import time
+from apscheduler.events import EVENT_JOB_ERROR
+from static.utils.db_utils import retry_on_db_lock
 
 logger = logging.getLogger(__name__)
 
@@ -24,16 +24,15 @@ def calculate_next_run_time(cron_expression):
         logger.error(f"Error calculating next run time: {str(e)}")
         return None
 
-def execute_powerbi_engine(program, execution_id):
+def execute_powerbi_engine(program):
     """
-    Execute Power BI Engine script with timeout
+    執行 Power BI Engine 腳本
     """
     try:
         # 設置超時時間（1小時）
         timeout = 3600
-
         
-        # 構建程式參數
+        # 構建程式參數並轉換為 JSON
         program_params = {
             'workspace_id': program.workspace_id,
             'report_name': program.report_name,
@@ -43,11 +42,10 @@ def execute_powerbi_engine(program, execution_id):
             'output_type': program.output_type,
             'sharepoint_site': program.sharepoint_site,
             'sharepoint_path': program.sharepoint_path,
-            'filelocation': program.filelocation,
-            'execution_id': str(execution_id)
+            'filelocation': program.filelocation
         }
         
-        # Build command
+        # 構建命令
         script_path = os.path.join('scripts', 'power_bi_engine.py')
         command = [
             'python',
@@ -55,7 +53,7 @@ def execute_powerbi_engine(program, execution_id):
             '--program', json.dumps(program_params, ensure_ascii=False)
         ]
         
-        # Execute command with timeout
+        # 執行命令並設置超時
         process = subprocess.Popen(
             command,
             stdout=subprocess.PIPE,
@@ -65,93 +63,86 @@ def execute_powerbi_engine(program, execution_id):
             errors='replace'
         )
         
-        # 等待進程完成或超時
         try:
             stdout, stderr = process.communicate(timeout=timeout)
+            return stdout, stderr if process.returncode != 0 else None
         except subprocess.TimeoutExpired:
             process.kill()
             stdout, stderr = process.communicate()
-            return False, "Execution timed out (over 1 hour)."
-        
-        # 更新執行記錄
-        execution = JobExecution.objects.get(execution_id=execution_id)
-        execution.output = stdout
-        execution.error = stderr
-        execution.status = 'completed' if process.returncode == 0 else 'failed'
-        execution.end_time = timezone.now()
-        execution.save()
-        
-        return process.returncode == 0, stdout or stderr
+            return None, "執行超時（超過1小時）"
             
     except Exception as e:
-        logger.error(f"Error executing Power BI Engine: {str(e)}")
-        return False, str(e)
+        logger.error(f"執行 Power BI Engine 時發生錯誤: {str(e)}")
+        return None, str(e)
 
+@retry_on_db_lock
 def execute_job(job_id):
+    """執行排程任務"""
     try:
+        # 從資料庫獲取任務資訊
         job = JobScheduler.objects.get(job_id=job_id)
-        program = job.program  # Get Program object
+        program = Program.objects.get(program_id=job.program_id)
         
-        # Create execution record
-        execution = JobExecution.objects.create(job=job)
+        # 創建執行記錄
+        execution = JobExecution.objects.create(
+            job_id=job,
+            status='running',
+            start_time=timezone.now()
+        )
         
         try:
-            # Update last run time
-            job.last_run_time = timezone.now()
-            # Calculate and update next run time
-            job.next_run_time = job.calculate_next_run_time()
-            job.save()
+            # 執行 PowerBI 引擎
+            output, error = execute_powerbi_engine(program)
             
-            # Execute task
-            success, message = execute_powerbi_engine(program, execution.execution_id)
-            
-            # Update execution record
+            # 更新執行記錄
+            execution.status = 'completed' if not error else 'failed'
             execution.end_time = timezone.now()
-            execution.status = 'completed' if success else 'failed'
-            execution.output = message if success else ''
-            execution.error = '' if success else message
+            execution.output = output
+            execution.error = error
             execution.save()
             
-            logger.info(f"Job execution: {job.job_name} - {'Success' if success else 'Failed'}")
+            logger.info(f"任務 {job.job_name} 執行成功")
             
         except Exception as e:
-            # Update execution record as failed
-            execution.end_time = timezone.now()
+            # 更新執行記錄為失敗
             execution.status = 'failed'
+            execution.end_time = timezone.now()
             execution.error = str(e)
             execution.save()
-            raise
             
-    except JobScheduler.DoesNotExist:
-        logger.error(f"Job not found with ID: {job_id}")
+            logger.error(f"任務 {job.job_name} 執行失敗: {str(e)}")
+            
     except Exception as e:
-        logger.error(f"Job execution failed: {str(e)}")
+        logger.error(f"執行任務 {job_id} 時發生錯誤: {str(e)}")
 
+@retry_on_db_lock
 def init_scheduler():
+    """初始化排程器"""
     scheduler = BackgroundScheduler()
     scheduler.add_jobstore(DjangoJobStore(), "default")
     
-    # Load all enabled jobs from database
+    # 載入所有啟用的任務
     jobs = JobScheduler.objects.filter(enabled=True)
     for job in jobs:
         try:
-            # Calculate and update next run time
-            job.next_run_time = job.calculate_next_run_time()
-            job.save()
-            
-            # Add the scheduled job
             scheduler.add_job(
                 execute_job,
                 CronTrigger.from_crontab(job.cron_expression),
                 id=str(job.job_id),
                 name=job.job_name,
                 args=[job.job_id],
-                replace_existing=True
+                replace_existing=True,
+                max_instances=1  # 限制同時執行的實例數
             )
-            
-            logger.info(f"Added scheduled job: {job.job_name}")
+            logger.info(f"已添加排程任務: {job.job_name}")
         except Exception as e:
-            logger.error(f"Failed to add scheduled job {job.job_name}: {str(e)}")
+            logger.error(f"添加排程任務 {job.job_name} 失敗: {str(e)}")
+    
+    # 設置 APScheduler 的錯誤處理
+    scheduler.add_listener(
+        lambda event: logger.error(f"排程器錯誤: {event.exception}") if event.exception else None,
+        EVENT_JOB_ERROR
+    )
     
     scheduler.start()
     return scheduler 

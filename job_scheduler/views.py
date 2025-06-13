@@ -8,6 +8,8 @@ from .models import JobScheduler, JobExecution
 from program.models import Program
 from django.utils import timezone
 import json
+from django.db import transaction
+from static.utils.db_utils import retry_on_db_lock
 import logging
 
 logger = logging.getLogger(__name__)
@@ -192,3 +194,62 @@ def get_execution_history(request, job_id):
         return JsonResponse({'error': 'Job not found'}, status=404)
     except Exception as e:
         return JsonResponse({'error': str(e)}, status=500)
+
+@retry_on_db_lock
+def create_job(request):
+    """創建排程任務"""
+    try:
+        data = json.loads(request.body)
+        with transaction.atomic():
+            job = JobScheduler.objects.create(
+                job_name=data['job_name'],
+                program_id=data['program_id'],
+                cron_expression=data['cron_expression'],
+                enabled=data.get('enabled', True),
+                description=data.get('description', '')
+            )
+        return JsonResponse({'status': 'success', 'job_id': job.job_id})
+    except Exception as e:
+        logger.error(f"Error creating job: {str(e)}")
+        return JsonResponse({'status': 'error', 'message': str(e)}, status=400)
+
+@retry_on_db_lock
+def update_job(request, job_id):
+    """更新排程任務"""
+    try:
+        data = json.loads(request.body)
+        with transaction.atomic():
+            job = JobScheduler.objects.get(job_id=job_id)
+            for field in ['job_name', 'program_id', 'cron_expression', 'enabled', 'description']:
+                if field in data:
+                    setattr(job, field, data[field])
+            job.save()
+        return JsonResponse({'status': 'success'})
+    except Exception as e:
+        logger.error(f"Error updating job: {str(e)}")
+        return JsonResponse({'status': 'error', 'message': str(e)}, status=400)
+
+@retry_on_db_lock
+def delete_job(request, job_id):
+    """刪除排程任務"""
+    try:
+        with transaction.atomic():
+            job = JobScheduler.objects.get(job_id=job_id)
+            job.delete()
+        return JsonResponse({'status': 'success'})
+    except Exception as e:
+        logger.error(f"Error deleting job: {str(e)}")
+        return JsonResponse({'status': 'error', 'message': str(e)}, status=400)
+
+@retry_on_db_lock
+def toggle_job(request, job_id):
+    """啟用/停用排程任務"""
+    try:
+        with transaction.atomic():
+            job = JobScheduler.objects.get(job_id=job_id)
+            job.enabled = not job.enabled
+            job.save()
+        return JsonResponse({'status': 'success', 'enabled': job.enabled})
+    except Exception as e:
+        logger.error(f"Error toggling job: {str(e)}")
+        return JsonResponse({'status': 'error', 'message': str(e)}, status=400)
