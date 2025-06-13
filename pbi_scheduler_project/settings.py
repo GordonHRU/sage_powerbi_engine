@@ -83,9 +83,9 @@ DATABASES = {
     "default": {
         "ENGINE": "django.db.backends.sqlite3",
         "NAME": BASE_DIR / "db.sqlite3",
-        "CONN_MAX_AGE": 60,  # 連接存活時間（秒）
         "OPTIONS": {
-            "timeout": 30,  # 連接超時時間
+            "timeout": 30,  # 增加超時時間
+            "check_same_thread": False,  # 允許多執行緒訪問
         }
     }
 }
