@@ -52,7 +52,7 @@ def create_job(request):
         elif request.method == "POST":
             data = json.loads(request.body)
             # 使用 frequency_convert 函數轉換頻率
-            if 'trigger_frequence' in data:
+            if 'trigger_frequency' in data:
                 data = frequency_convert(data, direction='forward')
 
             with transaction.atomic():
@@ -61,7 +61,7 @@ def create_job(request):
                     program_id=data['program_id'],
                     cron_expression=data['cron_expression'],
                     enabled=data.get('enabled', True),
-                    description=data.get('description', '')
+                    # description=data.get('description', '')
                 )
             # 返回成功狀態和重定向URL
             return JsonResponse({
@@ -100,7 +100,7 @@ def update_job(request, job_id):
         elif request.method == "POST":
             data = json.loads(request.body)
             # 使用 frequency_convert 函數轉換頻率
-            if 'trigger_frequence' in data:
+            if 'trigger_frequency' in data:
                 data = frequency_convert(data, direction='forward')
 
             with transaction.atomic():
@@ -138,8 +138,8 @@ def frequency_convert(data, direction='forward'):
     # 如果是 JobScheduler 對象，轉換為字典
 
     dayMapping = {
-        'Monday': '1', 'Tuesday': '2', 'Wednesday': '3', 'Thursday': '4',
-        'Friday': '5', 'Saturday': '6', 'Sunday': '0'
+        '1': 'Monday', '2': 'Tuesday', '3': 'Wednesday', '4': 'Thursday',
+        '5': 'Friday', '6': 'Saturday', '0': 'Sunday'
         }
 
     if direction == 'forward':
@@ -147,27 +147,27 @@ def frequency_convert(data, direction='forward'):
             case "Daily":
                 data['cron_expression'] = f"{data['trigger_minute']} {data['trigger_hour']} * * *"
             case "weekly":
-                data['cron_expression'] = f"{data['trigger_minute']} {data['trigger_hour']} * * {dayMapping[data['trigger_day']]}"
+                data['cron_expression'] = f"{data['trigger_minute']} {data['trigger_hour']} * * {data['trigger_day']}"
             case "monthly":
                 data['cron_expression'] = f"{data['trigger_minute']} {data['trigger_hour']} {data['trigger_date']} * *"
     else:  # reverse
         cron_parts = data['cron_expression'].split()
         if len(cron_parts) >= 5:
-            minute, hour, day, month, weekday = cron_parts[:5]
-            if day == '*' and weekday == '*':  # Daily
+            minute, hour, date, month, weekday = cron_parts[:5]
+            if date == '*' and weekday == '*':  # Daily
                 data['trigger_frequency'] = "Daily"
                 data['trigger_minute'] = minute.zfill(2)
                 data['trigger_hour'] = hour.zfill(2)
-            elif day == '*':  # Weekly
+            elif date == '*':  # Weekly
                 data['trigger_frequency'] = "Weekly"
                 data['trigger_minute'] = minute.zfill(2)
                 data['trigger_hour'] = hour.zfill(2)
-                data['trigger_day'] = list(dayMapping.keys())[list(dayMapping.values()).index(weekday)]
+                data['trigger_day'] = dayMapping[weekday]
             else:  # Monthly
                 data['trigger_frequency'] = "Monthly"
                 data['trigger_minute'] = minute.zfill(2)
                 data['trigger_hour'] = hour.zfill(2)
-                data['trigger_date'] = day.zfill(2)
+                data['trigger_date'] = date.zfill(2)
     return data
 
 

@@ -67,7 +67,6 @@ document.addEventListener('DOMContentLoaded', function() {
                 return null;
             }
         } catch (error) {
-            console.error('Error generating cron expression:', error);
             return null;
         }
     }
@@ -464,8 +463,6 @@ document.addEventListener('DOMContentLoaded', function() {
         form.addEventListener('submit', function(e) {
             e.preventDefault(); // Always prevent default form submission
             
-            console.log('Form submission started'); // Debug log
-            
             // Get all currently required fields (including conditional ones)
             const allFields = form.querySelectorAll('[required]');
             const conditionalFields = [];
@@ -511,10 +508,6 @@ document.addEventListener('DOMContentLoaded', function() {
             const triggerHour = document.getElementById('triggerHour').value;
             const triggerMinute = document.getElementById('triggerMinute').value;
             
-            console.log('Form data collected:', {
-                jobName, programId, triggerFrequency, triggerDay, triggerDate, triggerHour, triggerMinute
-            });
-            
             // Generate cron expression
             const cronExpression = generateCronExpression(
                 triggerFrequency,
@@ -523,8 +516,6 @@ document.addEventListener('DOMContentLoaded', function() {
                 parseInt(triggerHour),
                 parseInt(triggerMinute)
             );
-            
-            console.log('Generated cron expression:', cronExpression);
             
             if (!cronExpression) {
                 alert('Failed to generate schedule expression');
@@ -543,11 +534,8 @@ document.addEventListener('DOMContentLoaded', function() {
                 enabled: true
             };
             
-            console.log('JSON payload:', jsonData);
-            
             // Get CSRF token
             const csrfToken = document.querySelector('[name=csrfmiddlewaretoken]').value;
-            console.log('CSRF token:', csrfToken ? 'Found' : 'Not found');
             
             // Submit via JSON to the existing create_job function
             fetch(window.location.href, {
@@ -559,19 +547,15 @@ document.addEventListener('DOMContentLoaded', function() {
                 body: JSON.stringify(jsonData)
             })
             .then(response => {
-                console.log('Response status:', response.status);
-                console.log('Response headers:', response.headers);
                 
                 if (!response.ok) {
                     return response.json().then(err => {
-                        console.error('Error response:', err);
                         return Promise.reject(err);
                     });
                 }
                 return response.json();
             })
             .then(data => {
-                console.log('Success response:', data);
                 if (data.status === 'success') {
                     alert('Job created successfully!');
                     window.location.href = document.querySelector('a[href*="job_scheduler"]')?.href || '/job-scheduler/';
@@ -580,7 +564,6 @@ document.addEventListener('DOMContentLoaded', function() {
                 }
             })
             .catch(error => {
-                console.error('Fetch error:', error);
                 if (error.message) {
                     alert('Error: ' + error.message);
                 } else {
