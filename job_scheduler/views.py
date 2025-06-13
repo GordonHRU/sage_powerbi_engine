@@ -89,7 +89,6 @@ def update_job(request, job_id):
                 'program_id': job.program_id,
                 'cron_expression': job.cron_expression,
                 'enabled': job.enabled,
-                'description': job.description
             }
             job_data = frequency_convert(job_data, direction='reverse')
             return render(request, 'job_scheduler/edit_job.html', job_data)
