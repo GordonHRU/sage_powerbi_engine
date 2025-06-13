@@ -10,7 +10,7 @@ class JobSchedulerConfig(AppConfig):
     name = "job_scheduler"
 
     def ready(self):
-        if settings.SCHEDULER_AUTOSTART:
-            from .scheduler import init_scheduler
-            self.scheduler = init_scheduler()
-
+        # if settings.SCHEDULER_AUTOSTART:
+        #     from .scheduler import init_scheduler
+        #     self.scheduler = init_scheduler()
+        pass

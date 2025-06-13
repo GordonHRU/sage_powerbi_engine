@@ -147,3 +147,7 @@ def init_scheduler():
     scheduler.start()
     return scheduler 
 
+def get_scheduler():
+    if not hasattr(get_scheduler, '_scheduler'):
+        get_scheduler._scheduler = init_scheduler()
+    return get_scheduler._scheduler
