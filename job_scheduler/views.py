@@ -1,12 +1,8 @@
-from django.shortcuts import render, redirect
+from django.shortcuts import render
 from django.http import JsonResponse
 from django.views.decorators.http import require_http_methods
-from django.contrib import messages
-from django.views.decorators.csrf import csrf_exempt
-from django.utils.decorators import method_decorator
-from .models import JobScheduler, JobExecution
+from .models import JobScheduler
 from program.models import Program
-from django.utils import timezone
 import json
 from django.db import transaction
 from static.utils.db_utils import retry_on_db_lock
@@ -28,6 +24,8 @@ def job_scheduler_view(request):
                 'program_id': job.program_id,
                 'cron_expression': job.cron_expression,
                 'enabled': job.enabled,
+                'last_run_time': job.last_run_time,
+                'next_run_time': job.next_run_time,
             }
             job_detail = frequency_convert(job_data, direction='reverse')
             job_list.append(job_detail)
@@ -153,18 +151,13 @@ def frequency_convert(data, direction='forward'):
     """
     # 如果是 JobScheduler 對象，轉換為字典
 
-    dayMapping = {
-        '1': 'Monday', '2': 'Tuesday', '3': 'Wednesday', '4': 'Thursday',
-        '5': 'Friday', '6': 'Saturday', '0': 'Sunday'
-        }
-
     if direction == 'forward':
         match data['trigger_frequency']:
             case "Daily":
                 data['cron_expression'] = f"{data['trigger_minute']} {data['trigger_hour']} * * *"
-            case "weekly":
+            case "Weekly":
                 data['cron_expression'] = f"{data['trigger_minute']} {data['trigger_hour']} * * {data['trigger_day']}"
-            case "monthly":
+            case "Monthly":
                 data['cron_expression'] = f"{data['trigger_minute']} {data['trigger_hour']} {data['trigger_date']} * *"
     else:  # reverse
         cron_parts = data['cron_expression'].split()
@@ -172,18 +165,18 @@ def frequency_convert(data, direction='forward'):
             minute, hour, date, month, weekday = cron_parts[:5]
             if date == '*' and weekday == '*':  # Daily
                 data['trigger_frequency'] = "Daily"
-                data['trigger_minute'] = minute.zfill(2)
-                data['trigger_hour'] = hour.zfill(2)
+                data['trigger_minute'] = minute
+                data['trigger_hour'] = hour
             elif date == '*':  # Weekly
                 data['trigger_frequency'] = "Weekly"
-                data['trigger_minute'] = minute.zfill(2)
-                data['trigger_hour'] = hour.zfill(2)
-                data['trigger_day'] = dayMapping[weekday]
+                data['trigger_minute'] = minute
+                data['trigger_hour'] = hour
+                data['trigger_day'] = weekday
             else:  # Monthly
                 data['trigger_frequency'] = "Monthly"
-                data['trigger_minute'] = minute.zfill(2)
-                data['trigger_hour'] = hour.zfill(2)
-                data['trigger_date'] = date.zfill(2)
+                data['trigger_minute'] = minute
+                data['trigger_hour'] = hour
+                data['trigger_date'] = date
     return data
 
 

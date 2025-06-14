@@ -80,7 +80,7 @@
                                                 <span class="text-muted">All</span>
                                             {% endif %}
                                         </td>
-                                        <td>{{ job.trigger_hour }}:{{ job.trigger_minute }}</td>
+                                        <td>{{ job.trigger_hour|add:0|stringformat:"02d" }}:{{ job.trigger_minute|add:0|stringformat:"02d" }}</td>
                                         <td>
                                             {% if job.last_run_time %}
                                                 {{ job.last_run_time|date:"Y-m-d H:i" }}
