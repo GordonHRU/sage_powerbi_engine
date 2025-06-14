@@ -47,7 +47,23 @@ def create_job(request):
     """
     try:
         if request.method == "GET":
-            return render(request, 'job_scheduler/create_job.html')
+            # Fetch all programs from the database
+            programs = Program.objects.all().order_by('program_id')
+            
+            # Convert programs to a format suitable for the frontend
+            program_list = []
+            for program in programs:
+                program_list.append({
+                    'id': program.program_id,
+                    # 'name': program.program_name if hasattr(program, 'program_name') else f'Program {program.program_id}',
+                    # 'description': program.description if hasattr(program, 'description') else '',
+                })
+            
+            context = {
+                'programs': program_list,
+                'programs_json': json.dumps(program_list)
+            }
+            return render(request, 'job_scheduler/create_job.html', context)
             
         elif request.method == "POST":
             data = json.loads(request.body)

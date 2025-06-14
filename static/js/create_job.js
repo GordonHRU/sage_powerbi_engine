@@ -3,11 +3,28 @@ document.addEventListener('DOMContentLoaded', function() {
     const cancelBtn = document.getElementById('cancelBtn');
     const createBtn = document.getElementById('createBtn');
     
+    // Get real program data from the template
+    let programData = [];
+    try {
+        const programDataScript = document.getElementById('program-data');
+        if (programDataScript) {
+            const rawData = JSON.parse(programDataScript.textContent);
+            programData = rawData.map(program => ({
+                value: program.id.toString(),
+                text: `${program.id}`
+            }));
+        }
+    } catch (error) {
+        console.error('Error parsing program data:', error);
+        // Fallback to empty array if parsing fails
+        programData = [];
+    }
+    
     // Error messages for each field
     const errorMessages = {
         'jobName': 'Please provide a valid job name.',
-        'programId': 'Please select a valid program ID.',
-        'propertiesName': 'Please select a valid properties name.',
+        'programId': 'Please select a valid program.',
+        'propertiesName': 'Please select a valid report parameters.',
         'triggerFrequency': 'Please select a trigger frequency.',
         'triggerDay': 'Please select a day of the week.',
         'triggerDate': 'Please select a day of the month.',
@@ -15,20 +32,9 @@ document.addEventListener('DOMContentLoaded', function() {
         'triggerMinute': 'Please select a minute.'
     };
     
-    // Data for dropdowns
+    // Data for dropdowns - now using real program data
     const dropdownData = {
-        programId: [
-            { value: '1', text: 'PROG_001 - Sales Report Generator' },
-            { value: '2', text: 'PROG_002 - KPI Dashboard Builder' },
-            { value: '3', text: 'PROG_003 - Financial Report Engine' },
-            { value: '4', text: 'PROG_004 - Business Analytics Tool' },
-            { value: '5', text: 'PROG_005 - Customer Data Processor' },
-            { value: '6', text: 'PROG_006 - Inventory Tracker' },
-            { value: '7', text: 'PROG_007 - Performance Monitor' },
-            { value: '8', text: 'PROG_008 - Marketing Analytics' },
-            { value: '9', text: 'PROG_009 - HR Dashboard' },
-            { value: '10', text: 'PROG_010 - Supply Chain Analyzer' }
-        ],
+        programId: programData, // Use real data from database
         propertiesName: [
             { value: 'SalesReportConfig', text: 'SalesReportConfig' },
             { value: 'KPIDashboardSettings', text: 'KPIDashboardSettings' },
@@ -45,22 +51,28 @@ document.addEventListener('DOMContentLoaded', function() {
         ]
     };
     
+    // Display message if no programs are available
+    if (programData.length === 0) {
+        console.warn('No programs found in database. Please add programs before creating jobs.');
+        
+        // Optionally show a message to the user
+        const programDropdown = document.querySelector('[data-field="programId"]');
+        if (programDropdown) {
+            const searchInput = programDropdown.querySelector('.searchable-input');
+            if (searchInput) {
+                searchInput.placeholder = 'No programs available - Please add programs first';
+                searchInput.disabled = true;
+            }
+        }
+    }
+    
     // Helper function to generate cron expression
     function generateCronExpression(frequency, day, date, hour, minute) {
         try {
             if (frequency === 'Daily') {
                 return `${minute} ${hour} * * *`;
             } else if (frequency === 'Weekly') {
-                // Convert day name to number (Monday=1, Sunday=0)
-                const dayMapping = {
-                    'Monday': '1', 'Tuesday': '2', 'Wednesday': '3', 'Thursday': '4',
-                    'Friday': '5', 'Saturday': '6', 'Sunday': '0'
-                };
-                const dayNum = dayMapping[day];
-                if (!dayNum && dayNum !== '0') {
-                    return null;
-                }
-                return `${minute} ${hour} * * ${dayNum}`;
+                return `${minute} ${hour} * * ${day}`;
             } else if (frequency === 'Monthly') {
                 return `${minute} ${hour} ${date} * *`;
             } else {
@@ -138,7 +150,14 @@ document.addEventListener('DOMContentLoaded', function() {
             dropdownList.innerHTML = '';
             const data = dropdownData[fieldName];
             
-            if (!data) {
+            if (!data || data.length === 0) {
+                // Show message if no data available
+                const li = document.createElement('li');
+                li.textContent = fieldName === 'programId' ? 'No programs available' : 'No options available';
+                li.style.color = '#6c757d';
+                li.style.fontStyle = 'italic';
+                li.style.cursor = 'default';
+                dropdownList.appendChild(li);
                 return;
             }
             
@@ -189,9 +208,17 @@ document.addEventListener('DOMContentLoaded', function() {
                 
                 items.forEach(item => {
                     const text = item.textContent.toLowerCase();
-                    const value = item.getAttribute('data-value').toLowerCase();
+                    const value = item.getAttribute('data-value');
                     
-                    if (filter === '' || text.includes(filter) || value.includes(filter)) {
+                    if (!value) {
+                        // This is a "no data" message, always hide it when searching
+                        item.style.display = 'none';
+                        return;
+                    }
+                    
+                    const valueText = value.toLowerCase();
+                    
+                    if (filter === '' || text.includes(filter) || valueText.includes(filter)) {
                         item.style.display = 'block';
                     } else {
                         item.style.display = 'none';
@@ -202,8 +229,10 @@ document.addEventListener('DOMContentLoaded', function() {
                 const exactMatch = items.find(item => {
                     if (item.style.display === 'none') return false;
                     const text = item.textContent.toLowerCase();
-                    const value = item.getAttribute('data-value').toLowerCase();
-                    return text === filter || value === filter;
+                    const value = item.getAttribute('data-value');
+                    if (!value) return false;
+                    const valueText = value.toLowerCase();
+                    return text === filter || valueText === filter;
                 });
                 
                 hiddenInput.value = exactMatch ? exactMatch.getAttribute('data-value') : '';
@@ -218,7 +247,7 @@ document.addEventListener('DOMContentLoaded', function() {
             // Item selection
             dropdownList.addEventListener('click', function(e) {
                 const item = e.target.closest('li');
-                if (!item) return;
+                if (!item || !item.getAttribute('data-value')) return;
                 
                 e.preventDefault();
                 e.stopPropagation();
@@ -245,7 +274,9 @@ document.addEventListener('DOMContentLoaded', function() {
             
             // Keyboard navigation
             searchInput.addEventListener('keydown', function(e) {
-                const visibleItems = Array.from(dropdownList.children).filter(item => item.style.display !== 'none');
+                const visibleItems = Array.from(dropdownList.children).filter(item => 
+                    item.style.display !== 'none' && item.getAttribute('data-value')
+                );
                 
                 if (e.key === 'Escape') {
                     hideDropdown();
@@ -458,10 +489,16 @@ document.addEventListener('DOMContentLoaded', function() {
         }
     });
     
-    // UPDATED FORM SUBMISSION - JSON VERSION
+    // FORM SUBMISSION - JSON VERSION
     if (form) {
         form.addEventListener('submit', function(e) {
             e.preventDefault(); // Always prevent default form submission
+            
+            // Check if programs are available
+            if (programData.length === 0) {
+                alert('No programs available. Please add programs to the system before creating jobs.');
+                return false;
+            }
             
             // Get all currently required fields (including conditional ones)
             const allFields = form.querySelectorAll('[required]');
